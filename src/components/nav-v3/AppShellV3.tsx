@@ -25,12 +25,12 @@ import {
   brandModuleOrInsightsPath,
   brandInsightsPath,
   brandSettingsPath,
-  isValidBrandId,
+  BRAND_NEW_PATH,
   normalizeSlug,
   parseBrandPathname,
 } from "@/lib/brandRoutes";
+import { useBrands } from "@/context/BrandsProvider";
 import { createChatContext, type HistoryFilter } from "@/data/chatStatic";
-import { DOCK_BRANDS } from "@/data/homeStatic";
 import { useChat } from "@/context/ChatProvider";
 import {
   AGENTS_HOME_PATH,
@@ -83,6 +83,9 @@ import {
 import { ChatFullscreenView } from "./chat/ChatFullscreenView";
 import { ChatHistoryModal } from "./chat/ChatHistoryModal";
 import type { ChatDisplayMode, HistoryPopupSource } from "./chat/types";
+import { AllBrandsModal } from "./AllBrandsModal";
+import { JoinBrandModal } from "./JoinBrandModal";
+import { NewBrandPage } from "./NewBrandPage";
 
 export function AppShellV3() {
   const pathname = usePathname();
@@ -108,8 +111,11 @@ export function AppShellV3() {
     getStepDef,
     getSubSteps,
   } = usePitch();
+  const { userBrands, sidebarBrands, hasBrands } = useBrands();
 
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [allBrandsModalOpen, setAllBrandsModalOpen] = useState(false);
+  const [joinBrandModalOpen, setJoinBrandModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<TabId>("home");
   const [chatDisplayMode, setChatDisplayMode] =
     useState<ChatDisplayMode>("closed");
@@ -148,7 +154,9 @@ export function AppShellV3() {
   const hamburgerRef = useRef<HTMLButtonElement>(null);
   const closeTimer = useRef<number | null>(null);
 
-  const isBrand = activeBrandId !== null && !agentsRoute && !pitchRoute;
+  const isNewBrandRoute = pathname === BRAND_NEW_PATH;
+  const isBrand =
+    activeBrandId !== null && !agentsRoute && !pitchRoute && !isNewBrandRoute;
   const isBrandSettings = Boolean(brandRoute?.isSettings);
   const agentsTitle = getAgentsPageTitle(agentsRoute);
   const showSidebarChat = !pitchRoute;
@@ -212,18 +220,20 @@ export function AppShellV3() {
           : "Pitch"
     : null;
 
+  const activeBrandName =
+    userBrands.find((b) => b.id === activeBrandId)?.name ?? activeBrandId;
+
   const pageTitle = pitchTitle
     ? pitchTitle
-    : agentsTitle
-      ? agentsTitle
-      : isBrandSettings && activeBrandId
-        ? `Brand settings — ${
-            DOCK_BRANDS.find((b) => b.id === activeBrandId)?.name ??
-            activeBrandId
-          }`
-        : isBrand
-          ? getBrandContentTitle(brandModule, brandInsightsTab)
-          : V3_TAB_LABEL[activeTab];
+    : isNewBrandRoute
+      ? "Create brand"
+      : agentsTitle
+        ? agentsTitle
+        : isBrandSettings && activeBrandId
+          ? `Brand settings — ${activeBrandName}`
+          : isBrand
+            ? getBrandContentTitle(brandModule, brandInsightsTab)
+            : V3_TAB_LABEL[activeTab];
 
   useEffect(() => {
     if (pitchRoute) {
@@ -511,7 +521,7 @@ export function AppShellV3() {
   const handleBrandSelect = (brandId: string) => {
     closeChat();
     const normalized = normalizeSlug(brandId);
-    if (!isValidBrandId(normalized)) return;
+    if (!userBrands.some((b) => b.id === normalized)) return;
     router.push(brandInsightsPath(normalized, "overview"));
   };
 
@@ -671,8 +681,33 @@ export function AppShellV3() {
   const handleBrandSettings = useCallback(
     (brandId: string) => {
       const normalized = normalizeSlug(brandId);
-      if (!isValidBrandId(normalized)) return;
+      if (!userBrands.some((b) => b.id === normalized)) return;
       router.push(brandSettingsPath(normalized));
+    },
+    [router, userBrands]
+  );
+
+  const handleBrandsSeeAll = useCallback(() => {
+    setAllBrandsModalOpen(true);
+  }, []);
+
+  const handleCreateBrand = useCallback(() => {
+    closeChat();
+    setActiveTab("home");
+    router.push(BRAND_NEW_PATH);
+  }, [router, closeChat]);
+
+  const handleJoinByInvite = useCallback(() => {
+    setJoinBrandModalOpen(true);
+  }, []);
+
+  const handleNewBrandBack = useCallback(() => {
+    router.push("/");
+  }, [router]);
+
+  const handleNewBrandCreated = useCallback(
+    (path: string) => {
+      router.push(path);
     },
     [router]
   );
@@ -706,6 +741,8 @@ export function AppShellV3() {
       setChatMenuOpen(false);
       setFloatingOpen(false);
       setHistoryPopupOpen(false);
+      setAllBrandsModalOpen(false);
+      setJoinBrandModalOpen(false);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -719,6 +756,9 @@ export function AppShellV3() {
     onTabSelect: handleTabSelect,
     onBrandSelect: handleBrandSelect,
     onBrandSettings: handleBrandSettings,
+    sidebarBrands,
+    hasBrands,
+    onBrandsSeeAll: handleBrandsSeeAll,
     onModuleSelect: handleModuleSelect,
     onInsightsTabSelect: handleInsightsTabSelect,
     onBackToHome: handleBackToHome,
@@ -845,12 +885,14 @@ export function AppShellV3() {
               <AgentsBuilderWrapper onAskFrndOpen={handleAskFrndOpen} />
             ) : agentsRoute?.view === "home" ? (
               <AgentsHomePage onAskFrndOpen={handleAskFrndOpen} />
+            ) : isNewBrandRoute ? (
+              <NewBrandPage
+                onBack={handleNewBrandBack}
+                onCreated={handleNewBrandCreated}
+              />
             ) : isBrandSettings && activeBrandId ? (
               <PlaceholderPage
-                title={`Brand settings — ${
-                  DOCK_BRANDS.find((b) => b.id === activeBrandId)?.name ??
-                  activeBrandId
-                }`}
+                title={`Brand settings — ${activeBrandName}`}
                 description="Brand settings will live here. This is a placeholder in the prototype."
               />
             ) : isBrand ? (
@@ -864,6 +906,8 @@ export function AppShellV3() {
               <HomePageContentV3
                 activeTab={activeTab}
                 onBrandSelect={handleBrandSelect}
+                onCreateBrand={handleCreateBrand}
+                onJoinByInvite={handleJoinByInvite}
               />
             )}
 
@@ -899,6 +943,9 @@ export function AppShellV3() {
           onInsightsTabSelect={handleInsightsTabSelect}
           onBackToHome={handleBackToHome}
           onBrandSettings={handleBrandSettings}
+          sidebarBrands={sidebarProps.sidebarBrands}
+          hasBrands={sidebarProps.hasBrands}
+          onBrandsSeeAll={sidebarProps.onBrandsSeeAll}
           onDock={handleDockFromFloating}
           onPointerEnter={openFloating}
           onPointerLeave={scheduleCloseFloating}
@@ -953,6 +1000,22 @@ export function AppShellV3() {
         onNewChat={handleHistoryNewChat}
         onSelectConversation={handleHistorySelect}
         source={historyPopupSource}
+      />
+
+      <AllBrandsModal
+        open={allBrandsModalOpen}
+        onClose={() => setAllBrandsModalOpen(false)}
+        brands={userBrands}
+        activeBrandId={activeBrandId}
+        onBrandSelect={handleBrandSelect}
+        onBrandSettings={handleBrandSettings}
+        onCreateBrand={handleCreateBrand}
+        onJoinByInvite={handleJoinByInvite}
+      />
+
+      <JoinBrandModal
+        open={joinBrandModalOpen}
+        onClose={() => setJoinBrandModalOpen(false)}
       />
       </div>
     </div>

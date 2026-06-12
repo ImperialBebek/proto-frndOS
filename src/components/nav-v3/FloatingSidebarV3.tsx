@@ -8,6 +8,7 @@ import { useGSAP } from "@gsap/react";
 import type { TabId } from "@/data/homeStatic";
 import type { Conversation } from "@/data/chatStatic";
 import type { BrandModuleId, BrandInsightsTabId } from "@/data/navV3Static";
+import type { UserBrand } from "@/data/brandAccessStatic";
 import {
   prefersReducedMotion,
   v3FloatTiming,
@@ -37,6 +38,9 @@ type FloatingSidebarV3Props = {
   onTabSelect: (tab: TabId) => void;
   onBrandSelect: (brandId: string) => void;
   onBrandSettings?: (brandId: string) => void;
+  sidebarBrands?: UserBrand[];
+  hasBrands?: boolean;
+  onBrandsSeeAll?: () => void;
   onModuleSelect: (module: BrandModuleId) => void;
   onInsightsTabSelect: (tab: BrandInsightsTabId) => void;
   onBackToHome: () => void;
@@ -93,6 +97,9 @@ export function FloatingSidebarV3({
   onTabSelect,
   onBrandSelect,
   onBrandSettings,
+  sidebarBrands,
+  hasBrands,
+  onBrandsSeeAll,
   onModuleSelect,
   onInsightsTabSelect,
   onBackToHome,
@@ -229,6 +236,9 @@ export function FloatingSidebarV3({
             onTabSelect={onTabSelect}
             onBrandSelect={onBrandSelect}
             onBrandSettings={onBrandSettings}
+            sidebarBrands={sidebarBrands}
+            hasBrands={hasBrands}
+            onBrandsSeeAll={onBrandsSeeAll}
             onModuleSelect={onModuleSelect}
             onInsightsTabSelect={onInsightsTabSelect}
             onBackToHome={onBackToHome}

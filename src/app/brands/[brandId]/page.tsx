@@ -2,7 +2,7 @@ import { notFound, redirect } from "next/navigation";
 import {
   brandInsightsPath,
   getBrandIdsForStaticParams,
-  isValidBrandId,
+  isRouteableBrandId,
   normalizeSlug,
 } from "@/lib/brandRoutes";
 
@@ -18,7 +18,7 @@ export default async function BrandIndexPage({ params }: PageProps) {
   const { brandId: rawBrandId } = await params;
   const brandId = normalizeSlug(rawBrandId);
 
-  if (!isValidBrandId(brandId)) {
+  if (!isRouteableBrandId(brandId)) {
     notFound();
   }
 

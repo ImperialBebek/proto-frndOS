@@ -30,11 +30,14 @@ import {
   type TabId,
 } from "@/data/homeStatic";
 import { V3_TAB_LABEL, V3_USER } from "@/data/navV3Static";
+import { useBrands } from "@/context/BrandsProvider";
 import { PlaceholderPage } from "./PlaceholderPage";
 
 type HomePageContentV3Props = {
   activeTab: TabId;
   onBrandSelect: (brandId: string) => void;
+  onCreateBrand: () => void;
+  onJoinByInvite: () => void;
 };
 
 const badgeStyles = {
@@ -53,7 +56,26 @@ const userFirstName = V3_USER.name.split(" ")[0] ?? V3_USER.name;
 export function HomePageContentV3({
   activeTab,
   onBrandSelect,
+  onCreateBrand,
+  onJoinByInvite,
 }: HomePageContentV3Props) {
+  const { userBrands, pendingInvites, hasBrands, acceptInvite } = useBrands();
+
+  const brandCards = userBrands
+    .map((brand) => BRAND_CARDS.find((card) => card.id === brand.id))
+    .filter((card): card is BrandCard => Boolean(card));
+
+  const displayCards =
+    brandCards.length > 0
+      ? brandCards
+      : userBrands.map((brand) => ({
+          id: brand.id,
+          name: brand.name,
+          industry: brand.industry ?? "Brand",
+          logoUrl: brand.logoUrl,
+          badge: { text: brand.role === "owner" ? "Owner" : "Member", variant: "low" as const },
+          metrics: BRAND_CARDS[0].metrics,
+        }));
   if (activeTab === "inbox" || activeTab === "playground") {
     return (
       <PlaceholderPage
@@ -135,18 +157,83 @@ export function HomePageContentV3({
         <h2 className="text-xl font-medium tracking-[-0.4px] text-text-inverse">
           Your brands
         </h2>
-        <div className="grid grid-cols-3 gap-8">
-          {BRAND_CARDS.map((brand) => (
+
+        {!hasBrands && pendingInvites.length > 0 ? (
+          <div className="flex flex-col gap-4">
+            <p className="text-sm text-text-inverse-subtle">
+              You have pending invitations. Accept one to get started, or create
+              your own brand.
+            </p>
+            <ul className="flex flex-col gap-3">
+              {pendingInvites.map((invite) => (
+                <li
+                  key={invite.id}
+                  className="flex flex-wrap items-center justify-between gap-4 rounded-md border border-line bg-white/[0.03] px-5 py-4"
+                >
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-text-inverse">
+                      {invite.brandName}
+                    </p>
+                    <p className="mt-1 text-xs text-text-inverse-subtlest">
+                      Invited by {invite.invitedBy} · {invite.role} ·{" "}
+                      {invite.sentAt}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => acceptInvite(invite.id)}
+                    className="h-9 rounded-md bg-white px-4 text-sm font-medium text-black transition hover:bg-white/90"
+                  >
+                    Accept invite
+                  </button>
+                </li>
+              ))}
+            </ul>
             <button
-              key={brand.id}
               type="button"
-              onClick={() => onBrandSelect(brand.id)}
-              className="rounded-md text-left transition-transform hover:scale-[1.01] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500"
+              onClick={onCreateBrand}
+              className="w-fit text-sm font-medium text-text-inverse-subtle transition hover:text-text-inverse"
             >
-              <BrandMetricsCardV3 brand={brand} />
+              Create your own brand instead
             </button>
-          ))}
-        </div>
+          </div>
+        ) : !hasBrands ? (
+          <div className="flex flex-col items-start gap-4 rounded-md border border-line bg-white/[0.03] px-8 py-10">
+            <p className="max-w-[520px] text-sm text-text-inverse-subtle">
+              Create a brand to start tracking performance, running pitches, and
+              collaborating with your team.
+            </p>
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                type="button"
+                onClick={onCreateBrand}
+                className="h-10 rounded-md bg-white px-5 text-sm font-medium text-black transition hover:bg-white/90"
+              >
+                Create your first brand
+              </button>
+              <button
+                type="button"
+                onClick={onJoinByInvite}
+                className="h-10 rounded-md border border-line px-5 text-sm font-medium text-text-inverse transition hover:bg-white/[0.04]"
+              >
+                Join by invite
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-3 gap-8">
+            {displayCards.map((brand) => (
+              <button
+                key={brand.id}
+                type="button"
+                onClick={() => onBrandSelect(brand.id)}
+                className="rounded-md text-left transition-transform hover:scale-[1.01] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500"
+              >
+                <BrandMetricsCardV3 brand={brand} />
+              </button>
+            ))}
+          </div>
+        )}
       </section>
 
       <section className="flex w-full max-w-[1280px] flex-col gap-8">

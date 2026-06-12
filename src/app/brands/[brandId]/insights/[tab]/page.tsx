@@ -3,7 +3,7 @@ import { AppShellV3 } from "@/components/nav-v3/AppShellV3";
 import {
   getBrandIdsForStaticParams,
   getBrandInsightsTabIdsForStaticParams,
-  isValidBrandId,
+  isRouteableBrandId,
   isValidBrandInsightsTabId,
   normalizeSlug,
 } from "@/lib/brandRoutes";
@@ -25,7 +25,7 @@ export default async function BrandInsightsTabPage({ params }: PageProps) {
   const brandId = normalizeSlug(rawBrandId);
   const tab = normalizeSlug(rawTab);
 
-  if (!isValidBrandId(brandId) || !isValidBrandInsightsTabId(tab)) {
+  if (!isRouteableBrandId(brandId) || !isValidBrandInsightsTabId(tab)) {
     notFound();
   }
 

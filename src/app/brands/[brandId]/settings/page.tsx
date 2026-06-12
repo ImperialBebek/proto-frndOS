@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { AppShellV3 } from "@/components/nav-v3/AppShellV3";
 import {
   getBrandIdsForStaticParams,
-  isValidBrandId,
+  isRouteableBrandId,
   normalizeSlug,
 } from "@/lib/brandRoutes";
 
@@ -18,7 +18,7 @@ export default async function BrandSettingsPage({ params }: PageProps) {
   const { brandId: rawBrandId } = await params;
   const brandId = normalizeSlug(rawBrandId);
 
-  if (!isValidBrandId(brandId)) {
+  if (!isRouteableBrandId(brandId)) {
     notFound();
   }
 

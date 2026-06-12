@@ -1,9 +1,10 @@
 import { DOCK_BRANDS } from "@/data/homeStatic";
 import type { BrandInsightsTabId, BrandModuleId } from "@/data/navV3Static";
+import { isKnownBrandId } from "@/lib/brandRegistry";
 
 export type BrandId = (typeof DOCK_BRANDS)[number]["id"];
 
-const BRAND_IDS = new Set<string>(DOCK_BRANDS.map((b) => b.id));
+export const BRAND_NEW_PATH = "/brands/new";
 
 const BRAND_MODULE_IDS = [
   "insights",
@@ -35,7 +36,7 @@ export const DEFAULT_BRAND_MODULE: BrandModuleId = "insights";
 export const DEFAULT_INSIGHTS_TAB: BrandInsightsTabId = "overview";
 
 export type ParsedBrandRoute = {
-  brandId: BrandId;
+  brandId: string;
   brandModule: BrandModuleId;
   brandInsightsTab: BrandInsightsTabId;
   isSettings?: boolean;
@@ -46,7 +47,13 @@ export function normalizeSlug(slug: string): string {
 }
 
 export function isValidBrandId(id: string): id is BrandId {
-  return BRAND_IDS.has(id);
+  return isKnownBrandId(id);
+}
+
+/** Prototype: allow dynamically created brand slugs on routed pages */
+export function isRouteableBrandId(id: string): boolean {
+  if (!id || id === "new") return false;
+  return /^[a-z0-9-]+$/.test(id);
 }
 
 export function isValidBrandModuleId(id: string): id is BrandModuleId {
@@ -63,26 +70,26 @@ export function isNonInsightsModule(
   return module !== "insights";
 }
 
-export function brandBasePath(brandId: BrandId): string {
+export function brandBasePath(brandId: string): string {
   return `/brands/${brandId}`;
 }
 
 export function brandInsightsPath(
-  brandId: BrandId,
+  brandId: string,
   tab: BrandInsightsTabId = DEFAULT_INSIGHTS_TAB
 ): string {
   return `/brands/${brandId}/insights/${tab}`;
 }
 
 export function brandModulePath(
-  brandId: BrandId,
+  brandId: string,
   module: Exclude<BrandModuleId, "insights">
 ): string {
   return `/brands/${brandId}/${module}`;
 }
 
 export function brandModuleOrInsightsPath(
-  brandId: BrandId,
+  brandId: string,
   module: BrandModuleId,
   insightsTab: BrandInsightsTabId = DEFAULT_INSIGHTS_TAB
 ): string {
@@ -92,7 +99,7 @@ export function brandModuleOrInsightsPath(
   return brandModulePath(brandId, module);
 }
 
-export function brandSettingsPath(brandId: BrandId): string {
+export function brandSettingsPath(brandId: string): string {
   return `/brands/${brandId}/settings`;
 }
 
@@ -102,8 +109,12 @@ export function parseBrandPathname(pathname: string): ParsedBrandRoute | null {
     return null;
   }
 
+  if (segments[1] === "new") {
+    return null;
+  }
+
   const brandId = normalizeSlug(segments[1]);
-  if (!isValidBrandId(brandId)) {
+  if (!isRouteableBrandId(brandId)) {
     return null;
   }
 

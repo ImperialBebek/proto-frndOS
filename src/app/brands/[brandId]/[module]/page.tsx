@@ -5,7 +5,7 @@ import {
   getBrandIdsForStaticParams,
   getBrandModuleIdsForStaticParams,
   isNonInsightsModule,
-  isValidBrandId,
+  isRouteableBrandId,
   isValidBrandModuleId,
   normalizeSlug,
 } from "@/lib/brandRoutes";
@@ -27,7 +27,7 @@ export default async function BrandModulePage({ params }: PageProps) {
   const brandId = normalizeSlug(rawBrandId);
   const brandModule = normalizeSlug(rawModule);
 
-  if (!isValidBrandId(brandId)) {
+  if (!isRouteableBrandId(brandId)) {
     notFound();
   }
 

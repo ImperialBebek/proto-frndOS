@@ -7,25 +7,24 @@ import {
   SidebarSimple,
   CaretDown,
   ArrowLeft,
-  DotsThree,
-  Gear,
 } from "@phosphor-icons/react";
 import type { TabId } from "@/data/homeStatic";
-import { DOCK_BRANDS } from "@/data/homeStatic";
+import { useBrands } from "@/context/BrandsProvider";
 import type { Conversation } from "@/data/chatStatic";
 import {
   V3_PRIMARY_NAV,
-  V3_SIDEBAR_BRANDS,
   V3_FOOTER_NAV,
   V3_BRAND_FOOTER_NAV,
   V3_BRAND_MODULES,
   type BrandModuleId,
   type BrandInsightsTabId,
 } from "@/data/navV3Static";
+import type { UserBrand } from "@/data/brandAccessStatic";
 import { FrndLogo } from "./FrndLogo";
 import { ShellTopBarV3 } from "./ShellTopBarV3";
 import { PitchPipelineSidebarBody } from "./pitch/PitchPipelineSidebar";
 import { ChatQuickAccessSection } from "./ChatQuickAccessSection";
+import { BrandsQuickAccessSection } from "./BrandsQuickAccessSection";
 
 type SidebarV3Props = {
   activeTab: TabId;
@@ -35,6 +34,9 @@ type SidebarV3Props = {
   onTabSelect: (tab: TabId) => void;
   onBrandSelect: (brandId: string) => void;
   onBrandSettings?: (brandId: string) => void;
+  sidebarBrands?: UserBrand[];
+  hasBrands?: boolean;
+  onBrandsSeeAll?: () => void;
   onModuleSelect: (module: BrandModuleId) => void;
   onInsightsTabSelect: (tab: BrandInsightsTabId) => void;
   onBackToHome: () => void;
@@ -73,6 +75,9 @@ export function SidebarV3({
   onTabSelect,
   onBrandSelect,
   onBrandSettings,
+  sidebarBrands = [],
+  hasBrands = true,
+  onBrandsSeeAll,
   onModuleSelect,
   onInsightsTabSelect,
   onBackToHome,
@@ -89,10 +94,11 @@ export function SidebarV3({
   onBackToPitchList,
   floatingAnchor = false,
 }: SidebarV3Props) {
+  const { userBrands } = useBrands();
   const isPitchSession = activePitchId !== null;
   const isBrand = !isPitchSession && activeBrandId !== null;
   const brand = isBrand
-    ? DOCK_BRANDS.find((b) => b.id === activeBrandId)
+    ? userBrands.find((b) => b.id === activeBrandId)
     : null;
   const [insightsExpanded, setInsightsExpanded] = useState(true);
 
@@ -158,6 +164,9 @@ export function SidebarV3({
           onBrandSelect={onBrandSelect}
           onBrandSettings={onBrandSettings}
           activeBrandId={activeBrandId}
+          sidebarBrands={sidebarBrands}
+          hasBrands={hasBrands}
+          onBrandsSeeAll={onBrandsSeeAll}
           showChatQuickAccess={showChatQuickAccess}
           quickAccessChats={quickAccessChats}
           activeConversationId={activeConversationId}
@@ -176,6 +185,9 @@ function HomeSidebarBody({
   onBrandSelect,
   onBrandSettings,
   activeBrandId,
+  sidebarBrands,
+  hasBrands,
+  onBrandsSeeAll,
   showChatQuickAccess,
   quickAccessChats,
   activeConversationId,
@@ -188,6 +200,9 @@ function HomeSidebarBody({
   onBrandSelect: (brandId: string) => void;
   onBrandSettings?: (brandId: string) => void;
   activeBrandId: string | null;
+  sidebarBrands: UserBrand[];
+  hasBrands: boolean;
+  onBrandsSeeAll?: () => void;
   showChatQuickAccess: boolean;
   quickAccessChats: Conversation[];
   activeConversationId: string | null;
@@ -239,32 +254,14 @@ function HomeSidebarBody({
         })}
       </nav>
 
-      <div className="flex shrink-0 flex-col gap-2 p-4">
-        <p className="text-xs font-medium text-text-inverse-subtle">Brands</p>
-        <div className="flex flex-col gap-1">
-          {V3_SIDEBAR_BRANDS.map((b) => {
-            const isActive = activeBrandId === b.id;
-            return (
-              <BrandRow
-                key={b.id}
-                name={b.name}
-                isActive={isActive}
-                onSelect={() => onBrandSelect(b.id)}
-                onSettings={
-                  onBrandSettings ? () => onBrandSettings(b.id) : undefined
-                }
-              />
-            );
-          })}
-          <button
-            type="button"
-            className={`${menuRowBase} text-text-inverse-subtle hover:bg-[var(--nav-hover)] hover:text-text-inverse`}
-          >
-            <DotsThree size={20} className="shrink-0" />
-            <span>More</span>
-          </button>
-        </div>
-      </div>
+      <BrandsQuickAccessSection
+        brands={sidebarBrands}
+        activeBrandId={activeBrandId}
+        hasBrands={hasBrands}
+        onBrandSelect={onBrandSelect}
+        onBrandSettings={onBrandSettings}
+        onSeeAll={onBrandsSeeAll}
+      />
 
       {showChatQuickAccess && onChatSelect && onChatSeeAll && onChatNew && (
         <ChatQuickAccessSection
@@ -420,48 +417,6 @@ function BrandSidebarBody({
 
       <SidebarFooter items={V3_BRAND_FOOTER_NAV} onSelect={onFooterSelect} />
     </>
-  );
-}
-
-function BrandRow({
-  name,
-  isActive,
-  onSelect,
-  onSettings,
-}: {
-  name: string;
-  isActive: boolean;
-  onSelect: () => void;
-  onSettings?: () => void;
-}) {
-  return (
-    <div className="group relative">
-      <button
-        type="button"
-        onClick={onSelect}
-        className={`${menuRowBase} ${
-          isActive
-            ? "bg-[var(--nav-active)] text-text-inverse"
-            : "text-text-inverse-subtle hover:bg-[var(--nav-hover)] hover:text-text-inverse"
-        } ${onSettings ? "pr-8" : ""}`}
-      >
-        <BrandMark name={name} />
-        <span className="truncate">{name}</span>
-      </button>
-      {onSettings && (
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            onSettings();
-          }}
-          aria-label={`${name} settings`}
-          className="absolute right-1 top-1/2 flex size-6 -translate-y-1/2 items-center justify-center rounded-xs text-text-inverse-subtle opacity-0 transition hover:bg-white/[0.08] hover:text-text-inverse group-hover:opacity-100 focus-visible:opacity-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500"
-        >
-          <Gear size={16} />
-        </button>
-      )}
-    </div>
   );
 }
 

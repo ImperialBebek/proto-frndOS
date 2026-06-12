@@ -4,7 +4,7 @@
 
 import { useCallback, useRef, useState } from "react";
 import { FunnelSimple, CalendarBlank } from "@phosphor-icons/react";
-import { DOCK_BRANDS } from "@/data/homeStatic";
+import { useBrands } from "@/context/BrandsProvider";
 import {
   QUICK_BRIEF_TEXT,
   QUICK_BRIEF_CHIPS,
@@ -24,6 +24,7 @@ import {
   type BrandInsightsTabId,
 } from "@/data/navV3Static";
 import { PlaceholderPage } from "./PlaceholderPage";
+import { BrandSetupBanner } from "./BrandSetupBanner";
 
 const STAGGER = 55;
 
@@ -74,8 +75,10 @@ export function BrandPageV3({
     [onAskFrndOpen]
   );
 
+  const { userBrands, isNewBrand, clearNewBrandFlag } = useBrands();
   const isCardSelected = (id: string) => selectedCards.some((c) => c.id === id);
-  const brand = DOCK_BRANDS.find((b) => b.id === brandId);
+  const brand = userBrands.find((b) => b.id === brandId);
+  const showSetupBanner = isNewBrand(brandId);
   const isOverview =
     brandModule === "insights" && brandInsightsTab === "overview";
 
@@ -99,6 +102,13 @@ export function BrandPageV3({
         {brand && <p className="sr-only">Viewing {brand.name}</p>}
 
         <div className="flex w-full max-w-[1200px] flex-col gap-16">
+          {showSetupBanner && brand && (
+            <BrandSetupBanner
+              brandName={brand.name}
+              onDismiss={() => clearNewBrandFlag(brandId)}
+            />
+          )}
+
           <section
             data-section-id="quick-brief"
             className="flex flex-col items-center gap-8 px-12 py-8"
