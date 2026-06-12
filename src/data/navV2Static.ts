@@ -32,27 +32,29 @@ export const TOOL_DOCK_ITEMS: ToolDockItem[] = [
     id: "inbox",
     label: "Inbox",
     icon: Tray,
-    tileClass: "bg-positive-50",
+    tileClass: "bg-positive-600/20",
     iconClass: "text-positive-600",
   },
   {
     id: "pitch",
     label: "Pitch",
     icon: CardsThree,
-    tileClass: "bg-negative-50",
+    tileClass: "bg-negative-500/20",
     iconClass: "text-negative-500",
   },
   {
     id: "playground",
     label: "Playground",
     icon: PaintBrush,
-    tileClass: "bg-warning-50",
-    iconClass: "text-warning-600",
+    tileClass: "bg-warning-500/20",
+    iconClass: "text-warning-500",
   },
 ];
 
-export type NavVariant = "v1" | "v2";
+export type NavVariant = "v1" | "v2" | "v3";
 
 export function parseNavVariant(param: string | null): NavVariant {
-  return param === "v2" ? "v2" : "v1";
+  if (param === "v2") return "v2";
+  if (param === "v3") return "v3";
+  return "v1";
 }

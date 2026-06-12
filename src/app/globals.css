@@ -43,10 +43,28 @@
   --container-light: #ffffff;
   --container-translucent-subtle: rgba(255, 255, 255, 0.15);
 
+  --shadow-card: 0px 0px 2px var(--grey-100);
+  --shadow-command: 0px 0px 4px 0px var(--grey-100);
+
   --radius-xs: 8px;
   --radius-sm: 12px;
   --radius-md: 16px;
   --radius-rounded: 1000px;
+
+  /* v3 dark navigation — Figma 2608:5779 */
+  --app-bg: #111111;
+  --card-bg: #1a1a1a;
+  --text-inverse-subtle: #b0b0b0;
+  --text-inverse-subtlest: #888888;
+  --surface-line: rgba(255, 255, 255, 0.1);
+  --container-input: rgba(255, 255, 255, 0.05);
+  --container-input-hover: rgba(255, 255, 255, 0.08);
+  --container-translucent: rgba(255, 255, 255, 0.15);
+  --nav-active: rgba(255, 255, 255, 0.05);
+  --nav-hover: rgba(255, 255, 255, 0.06);
+  --popover-bg: rgba(26, 26, 26, 0.96);
+  --shell-overlay: rgba(0, 0, 0, 0.42);
+  --v3-shell-top-bar-height: 72px;
 }
 
 body {
@@ -83,4 +101,218 @@ body {
 
 .animate-pill-pop {
   animation: pill-pop 220ms cubic-bezier(0.34, 1.4, 0.64, 1) both;
+}
+
+/* Quick Brief AI narration caret */
+.quick-brief-caret {
+  width: 2px;
+  height: 0.85em;
+  border-radius: 1px;
+  background: linear-gradient(
+    180deg,
+    var(--primary-400) 0%,
+    var(--primary-500) 100%
+  );
+  box-shadow: 0 0 6px rgba(78, 158, 248, 0.45);
+}
+
+.quick-brief-narration:focus-visible {
+  outline: 2px solid var(--primary-500);
+  outline-offset: 4px;
+  border-radius: var(--radius-xs);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .quick-brief-caret {
+    display: none;
+  }
+}
+
+/* Brand page entrance — subtle stagger, first viewport entry */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes text-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+@keyframes card-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes fade-only {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes bar-fill {
+  from {
+    width: 0;
+  }
+  to {
+    width: var(--bar-target-width);
+  }
+}
+
+.animate-enter {
+  opacity: 0;
+}
+
+.animate-enter.is-entered.animate-enter-fade-up {
+  animation: fade-up 180ms ease-out var(--enter-delay, 0ms) forwards;
+}
+
+.animate-enter.is-entered.animate-enter-text-reveal {
+  animation: text-reveal 280ms ease-out var(--enter-delay, 0ms) forwards;
+}
+
+.animate-enter.is-entered.animate-enter-card-rise {
+  animation: card-rise 220ms ease-out var(--enter-delay, 0ms) forwards;
+}
+
+.animate-enter.is-entered.animate-enter-fade-only {
+  animation: fade-only 160ms ease-out var(--enter-delay, 0ms) forwards;
+}
+
+.animate-bar-track .animate-bar-fill {
+  width: 0;
+}
+
+.animate-bar-track.is-bar-entered .animate-bar-fill {
+  animation: bar-fill 600ms ease-out var(--enter-delay, 0ms) forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-enter.is-entered.animate-enter-fade-up,
+  .animate-enter.is-entered.animate-enter-text-reveal,
+  .animate-enter.is-entered.animate-enter-card-rise {
+    animation: fade-only 160ms ease-out var(--enter-delay, 0ms) forwards;
+  }
+
+  .animate-bar-track.is-bar-entered .animate-bar-fill {
+    animation: fade-only 200ms ease-out var(--enter-delay, 0ms) forwards;
+    width: var(--bar-target-width);
+  }
+}
+
+/* v1/v2 dark theme scope — Figma 2596:4973 */
+.theme-dark {
+  --grey-50: #1a1a1a;
+  --grey-100: #222222;
+  --grey-200: rgba(255, 255, 255, 0.1);
+
+  --text-default: #f6f6f6;
+  --text-subtle: #b0b0b0;
+  --text-subtlest: #888888;
+
+  --container-light: #1a1a1a;
+  --container-translucent-subtle: rgba(255, 255, 255, 0.15);
+
+  --shadow-card: 0px 4px 8px 0px rgba(0, 0, 0, 0.4);
+  --shadow-command: 0px 4px 8px 0px rgba(0, 0, 0, 0.4);
+
+  --emerald-100: rgba(65, 145, 112, 0.2);
+  --emerald-800: #6ee7b7;
+  --yellow-100: rgba(226, 177, 61, 0.2);
+  --yellow-900: #fde68a;
+  --red-50: rgba(231, 65, 54, 0.15);
+  --red-800: #fca5a5;
+
+  color: var(--text-default);
+}
+
+/* v3 dark theme scope */
+.theme-v3 {
+  color: var(--text-inverse);
+}
+
+/* ------------------------------------------------------------------ */
+/* Pitch export — print styles (#pitch-export-print-root)              */
+/* ------------------------------------------------------------------ */
+
+@media print {
+  @page {
+    size: 297mm 167mm;
+    margin: 0;
+  }
+
+  html:has(#pitch-export-print-root),
+  body:has(#pitch-export-print-root) {
+    height: auto !important;
+    overflow: visible !important;
+    background: #ffffff !important;
+  }
+
+  /* The print root is portaled to <body>; hiding every sibling keeps the
+     app shell (fixed/overflow containers) from clipping or bleeding in. */
+  body:has(#pitch-export-print-root) > *:not(#pitch-export-print-root) {
+    display: none !important;
+  }
+
+  #pitch-export-print-root {
+    display: block !important;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 297mm;
+    background: #ffffff;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  #pitch-export-print-root * {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  #pitch-export-print-root .pitch-print-slide {
+    width: 297mm;
+    height: 167mm;
+    overflow: hidden;
+    background: #ffffff;
+    break-after: page;
+    page-break-after: always;
+  }
+
+  #pitch-export-print-root .pitch-print-slide:last-child {
+    break-after: auto;
+    page-break-after: auto;
+  }
+
+  /* Slides render at a fixed 960×540 design size; scale to the
+     167mm page height (167mm ≈ 631.2px → 631.2 / 540 ≈ 1.1688). */
+  #pitch-export-print-root .pitch-print-slide-inner {
+    width: 960px;
+    height: 540px;
+    transform: scale(1.1688);
+    transform-origin: top left;
+  }
 }

@@ -22,7 +22,7 @@ export function MetricsCard({ brand }: MetricsCardProps) {
   const [impressions, spend, conversion, revenue] = brand.metrics;
 
   return (
-    <article className="flex min-h-[208px] flex-col gap-6 rounded-md bg-white p-6 shadow-card transition-shadow hover:shadow-[0px_0px_8px_var(--grey-100)]">
+    <article className="flex min-h-[208px] flex-col gap-6 rounded-md border border-line bg-grey-50 p-6 shadow-card transition-shadow hover:shadow-card">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="relative size-6 overflow-hidden rounded-rounded">

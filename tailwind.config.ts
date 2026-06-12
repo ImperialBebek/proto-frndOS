@@ -27,7 +27,16 @@ const config: Config = {
           subtle: "var(--text-subtle)",
           subtlest: "var(--text-subtlest)",
           inverse: "var(--text-inverse)",
+          "inverse-subtle": "var(--text-inverse-subtle)",
+          "inverse-subtlest": "var(--text-inverse-subtlest)",
         },
+        app: {
+          bg: "var(--app-bg)",
+        },
+        card: {
+          bg: "var(--card-bg)",
+        },
+        line: "var(--surface-line)",
         positive: {
           50: "var(--positive-50)",
           600: "var(--positive-600)",
@@ -65,8 +74,8 @@ const config: Config = {
         sans: ["var(--font-geist-sans)", "system-ui", "sans-serif"],
       },
       boxShadow: {
-        card: "0px 0px 2px var(--grey-100)",
-        command: "0px 0px 4px 0px var(--grey-100)",
+        card: "var(--shadow-card)",
+        command: "var(--shadow-command)",
       },
       backdropBlur: {
         shallow: "16px",

@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { GeistSans } from "geist/font/sans";
+import { AgentationDev } from "@/components/AgentationDev";
+import { Providers } from "@/components/Providers";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -14,7 +16,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={GeistSans.className}>
-      <body className="antialiased">{children}</body>
+      <body className="antialiased">
+        <Providers>
+          {children}
+          {process.env.NODE_ENV === "development" && <AgentationDev />}
+        </Providers>
+      </body>
     </html>
   );
 }

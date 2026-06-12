@@ -12,7 +12,7 @@ export function SuggestionList() {
         <li key={suggestion.text}>
           <button
             type="button"
-            className="group flex w-full items-center justify-between gap-4 rounded-sm text-left transition-colors hover:bg-white/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500"
+            className="group flex w-full items-center justify-between gap-4 rounded-sm text-left transition-colors hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500"
           >
             <span className="flex min-w-0 items-center gap-3">
               <ChatCircle

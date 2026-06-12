@@ -56,7 +56,7 @@ export function ModuleDockControls({
             } ${
               isActive
                 ? "bg-primary-600 text-white"
-                : "bg-grey-50 text-text-subtle hover:bg-grey-100"
+                : "bg-[var(--container-input)] text-text-subtle hover:bg-white/10"
             }`}
           >
             <Icon

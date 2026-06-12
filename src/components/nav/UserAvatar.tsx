@@ -15,7 +15,7 @@ export function UserAvatar({ size = 32, className = "" }: UserAvatarProps) {
 
   return (
     <div
-      className={`relative shrink-0 overflow-hidden rounded-rounded bg-grey-100 ring-1 ring-grey-100 ${className}`}
+      className={`relative shrink-0 overflow-hidden rounded-rounded bg-grey-100 ring-1 ring-line ${className}`}
       style={{ width: size, height: size }}
     >
       {!failed ? (

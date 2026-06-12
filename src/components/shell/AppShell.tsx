@@ -10,7 +10,7 @@ type AppShellProps = {
 
 export function AppShell({ topNav, children, bottomNav }: AppShellProps) {
   return (
-    <div className="isolate flex min-h-screen min-w-[1440px] flex-col rounded-[32px] bg-grey-50">
+    <div className="theme-dark isolate flex min-h-screen min-w-[1440px] flex-col rounded-[32px] bg-app-bg">
       {topNav}
       <main className="relative z-[2] flex flex-1 flex-col">{children}</main>
       {bottomNav}

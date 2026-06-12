@@ -6,7 +6,7 @@ import { MagnifyingGlass, Command } from "@phosphor-icons/react";
 
 export function CommandBar() {
   return (
-    <div className="flex h-12 w-full max-w-[738px] items-center gap-3 rounded-md bg-white/80 px-4 py-2 shadow-command backdrop-blur-container">
+    <div className="flex h-12 w-full max-w-[738px] items-center gap-3 rounded-md bg-[var(--container-input)] px-4 py-2 shadow-command backdrop-blur-container border border-line">
       <div className="flex min-w-0 flex-1 items-center gap-3">
         <MagnifyingGlass
           size={20}
@@ -23,10 +23,10 @@ export function CommandBar() {
         />
       </div>
       <div className="flex shrink-0 items-center gap-2" aria-hidden>
-        <kbd className="flex size-6 items-center justify-center rounded-xs border border-black/5 bg-white text-text-subtle">
+        <kbd className="flex size-6 items-center justify-center rounded-xs border border-line bg-[var(--container-input)] text-text-subtle">
           <Command size={16} weight="regular" />
         </kbd>
-        <kbd className="flex size-6 items-center justify-center rounded-xs border border-black/5 bg-white text-xs font-medium text-text-subtle">
+        <kbd className="flex size-6 items-center justify-center rounded-xs border border-line bg-[var(--container-input)] text-xs font-medium text-text-subtle">
           K
         </kbd>
       </div>

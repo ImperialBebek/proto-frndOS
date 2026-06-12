@@ -50,8 +50,8 @@ export function BrandTopNav({ activeTab, onTabChange }: BrandTopNavProps) {
               aria-pressed={isActive}
               className={`flex h-8 items-center gap-1.5 rounded-rounded px-3 py-1.5 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500 ${
                 isActive
-                  ? "bg-white shadow-card"
-                  : "hover:bg-white/60"
+                  ? "bg-white/10 shadow-card"
+                  : "hover:bg-white/10"
               }`}
             >
               <span

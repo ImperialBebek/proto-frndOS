@@ -44,8 +44,8 @@ export function DockControls({
           isFloating
             ? homeActive
               ? "bg-primary-500 text-white"
-              : "bg-grey-50 text-text-subtle hover:bg-grey-100"
-            : "bg-grey-50 text-text-subtle hover:bg-grey-100"
+              : "bg-[var(--container-input)] text-text-subtle hover:bg-white/10"
+            : "bg-[var(--container-input)] text-text-subtle hover:bg-white/10"
         }`}
       >
         <House
@@ -133,7 +133,7 @@ export function MorphingDockShell({
           className={`pointer-events-auto flex items-center transition-[background-color,box-shadow,border-radius,padding] duration-200 ease-out ${
             isSticky
               ? `rounded-none bg-transparent shadow-none ${stickyNavClass}`
-              : "gap-2 rounded-md bg-white p-2 shadow-card"
+              : "gap-2 rounded-md border border-line bg-grey-50 p-2 shadow-card"
           }`}
         >
           {children}

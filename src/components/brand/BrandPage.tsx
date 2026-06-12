@@ -27,7 +27,7 @@ export function BrandPage({ brandId }: BrandPageProps) {
   const brand = DOCK_BRANDS.find((b) => b.id === brandId);
 
   return (
-    <div className="flex h-dvh min-w-[1440px] flex-col overflow-hidden bg-grey-100">
+    <div className="theme-dark flex h-dvh min-w-[1440px] flex-col overflow-hidden bg-app-bg">
       <div className="flex min-h-0 flex-1 flex-col px-2 pt-2 pb-0">
         <div
           key={brandId}
@@ -42,7 +42,7 @@ export function BrandPage({ brandId }: BrandPageProps) {
               <p className="text-sm font-medium text-text-subtlest tracking-[-0.14px]">
                 Quick Brief
               </p>
-              <p className="bg-gradient-to-b from-primary-700 via-primary-400 via-[75%] to-primary-50 bg-clip-text text-center text-[32px] font-medium leading-[1.2] tracking-[-0.48px] text-transparent">
+              <p className="bg-gradient-to-b from-primary-400 via-primary-500 via-[75%] to-primary-950 bg-clip-text text-center text-[32px] font-medium leading-[1.2] tracking-[-0.48px] text-transparent">
                 {QUICK_BRIEF_TEXT}
               </p>
               <div className="flex flex-wrap items-center justify-center gap-2">
@@ -50,7 +50,7 @@ export function BrandPage({ brandId }: BrandPageProps) {
                   <button
                     key={chip}
                     type="button"
-                    className="rounded-rounded bg-primary-50 px-3 py-2 text-sm font-medium text-primary-600 tracking-[-0.14px] transition-colors hover:bg-primary-50/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500"
+                    className="rounded-rounded border border-line bg-[var(--container-input)] px-3 py-2 text-sm font-medium text-primary-400 tracking-[-0.14px] transition-colors hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500"
                   >
                     {chip}
                   </button>
@@ -72,14 +72,14 @@ export function BrandPage({ brandId }: BrandPageProps) {
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
-                    className="flex h-8 items-center gap-2 rounded-rounded border border-grey-100 bg-white px-4 text-xs font-medium transition-colors hover:bg-grey-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500"
+                    className="flex h-8 items-center gap-2 rounded-rounded border border-line bg-[var(--container-input)] px-4 text-xs font-medium transition-colors hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500"
                   >
                     <FunnelSimple size={16} />
                     Filters
                   </button>
                   <button
                     type="button"
-                    className="flex h-8 items-center gap-2 rounded-rounded border border-grey-100 bg-white px-3 text-xs font-medium transition-colors hover:bg-grey-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500"
+                    className="flex h-8 items-center gap-2 rounded-rounded border border-line bg-[var(--container-input)] px-3 text-xs font-medium transition-colors hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500"
                   >
                     <CalendarBlank size={16} />
                     01/10/25 - 18/12/25
@@ -99,7 +99,7 @@ export function BrandPage({ brandId }: BrandPageProps) {
                     <SimpleMetricCard key={metric.label} metric={metric} />
                   ))}
                 </div>
-                <article className="flex h-[334px] flex-1 flex-col rounded-md bg-white p-4">
+                <article className="flex h-[334px] flex-1 flex-col rounded-md border border-line bg-grey-50 p-4">
                   <AudienceAgeChart />
                 </article>
               </div>

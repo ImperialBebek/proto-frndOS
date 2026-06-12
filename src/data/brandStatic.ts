@@ -7,6 +7,31 @@ export type BrandModuleTab =
   | "growth"
   | "loyalty";
 
+/** v2 top nav tabs — Figma 2600:5298 */
+export type BrandTopNavTabV2 =
+  | "overview"
+  | "campaigns"
+  | "ads"
+  | "social-media"
+  | "influencer"
+  | "atl"
+  | "trend-signals"
+  | "social-listening";
+
+export const BRAND_TOP_NAV_TABS: {
+  id: BrandTopNavTabV2;
+  label: string;
+}[] = [
+  { id: "overview", label: "Overview" },
+  { id: "campaigns", label: "Campaigns" },
+  { id: "ads", label: "Ads" },
+  { id: "social-media", label: "Social Media" },
+  { id: "influencer", label: "Influencer" },
+  { id: "atl", label: "ATL" },
+  { id: "trend-signals", label: "Trend Signals" },
+  { id: "social-listening", label: "Social Listening" },
+];
+
 export type ProgressMetric = {
   label: string;
   value: string;
