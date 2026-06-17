@@ -29,6 +29,13 @@ colors:
   icon-inverse: "#f6f6f6"
   icon-inverse-subtle: "#d1d1d1"
   icon-inverse-subtlest: "#888888"
+  primary: "#3a7ff7"
+  surface-translucent-subtlest-on-app: "#1d1d1d"
+  surface-translucent-subtle-on-app: "#353535"
+  surface-input-on-app: "#1d1d1d"
+  surface-nav-hover-on-app: "#1f1f1f"
+  surface-nav-active-on-app: "#1d1d1d"
+  surface-negative-subtle-on-app: "#2b1716"
   primary-50: "#eff9fe"
   primary-400: "#6dbef9"
   primary-500: "#4e9ef8"
@@ -303,7 +310,7 @@ components:
     rounded: "{rounded.full}"
     size: 64px
   chip:
-    backgroundColor: "{colors.container-translucent-subtlest}"
+    backgroundColor: "{colors.surface-translucent-subtlest-on-app}"
     textColor: "{colors.text-inverse-subtle}"
     typography: "{typography.text-xs-medium}"
     rounded: "{rounded.full}"
@@ -330,10 +337,10 @@ components:
   button-primary-hover:
     backgroundColor: "{colors.grey-100}"
   button-primary-disabled:
-    backgroundColor: "{colors.container-translucent-subtle}"
-    textColor: "{colors.text-inverse-subtlest}"
+    backgroundColor: "{colors.surface-translucent-subtle-on-app}"
+    textColor: "{colors.text-inverse-subtle}"
   button-secondary:
-    backgroundColor: "{colors.container-translucent-subtlest}"
+    backgroundColor: "{colors.surface-translucent-subtlest-on-app}"
     textColor: "{colors.text-inverse}"
     typography: "{typography.text-sm-medium}"
     rounded: "{rounded.full}"
@@ -342,8 +349,8 @@ components:
   button-secondary-hover:
     backgroundColor: "{colors.container-translucent-subtle}"
   button-danger:
-    backgroundColor: "rgba(231, 65, 54, 0.12)"
-    textColor: "{colors.negative-500}"
+    backgroundColor: "{colors.surface-negative-subtle-on-app}"
+    textColor: "{colors.red-400}"
     typography: "{typography.text-sm-medium}"
     rounded: "{rounded.full}"
     padding: 12px
@@ -353,10 +360,10 @@ components:
     rounded: "{rounded.full}"
     size: 36px
   button-icon-hover:
-    backgroundColor: "{colors.nav-hover}"
+    backgroundColor: "{colors.surface-nav-hover-on-app}"
     textColor: "{colors.icon-inverse}"
   input:
-    backgroundColor: "{colors.container-input}"
+    backgroundColor: "{colors.surface-input-on-app}"
     textColor: "{colors.text-inverse}"
     typography: "{typography.text-sm}"
     rounded: "{rounded.sm}"
@@ -365,8 +372,8 @@ components:
   input-hover:
     backgroundColor: "{colors.container-input-hover}"
   command-bar:
-    backgroundColor: "{colors.container-input}"
-    textColor: "{colors.text-inverse-subtlest}"
+    backgroundColor: "{colors.surface-input-on-app}"
+    textColor: "{colors.text-inverse-subtle}"
     typography: "{typography.text-md}"
     rounded: "{rounded.md}"
     padding: 16px
@@ -379,10 +386,10 @@ components:
     padding: 8px
     height: 40px
   menu-item-hover:
-    backgroundColor: "{colors.nav-hover}"
+    backgroundColor: "{colors.surface-nav-hover-on-app}"
     textColor: "{colors.text-inverse}"
   menu-item-active:
-    backgroundColor: "{colors.nav-active}"
+    backgroundColor: "{colors.surface-nav-active-on-app}"
     textColor: "{colors.text-inverse}"
   status-badge-positive:
     backgroundColor: "{colors.emerald-400}"
@@ -407,6 +414,108 @@ components:
     typography: "{typography.text-sm}"
     rounded: "{rounded.sm}"
     padding: 16px
+  page-canvas:
+    backgroundColor: "{colors.app-bg}"
+    textColor: "{colors.text-inverse}"
+  page-canvas-alt:
+    backgroundColor: "{colors.grey-950}"
+    textColor: "{colors.text-inverse}"
+  popover:
+    backgroundColor: "{colors.popover-bg}"
+    textColor: "{colors.text-inverse}"
+  modal-scrim:
+    backgroundColor: "{colors.shell-overlay}"
+  divider:
+    backgroundColor: "{colors.surface-line}"
+  divider-stroke:
+    backgroundColor: "{colors.stroke-default}"
+  link-primary:
+    textColor: "{colors.primary}"
+    typography: "{typography.text-sm-medium}"
+  link-accent-500:
+    textColor: "{colors.primary-500}"
+    typography: "{typography.text-sm-medium}"
+  link-primary-hover:
+    textColor: "{colors.primary-600}"
+    typography: "{typography.text-sm-medium}"
+  link-primary-pressed:
+    textColor: "{colors.primary-700}"
+    typography: "{typography.text-sm-medium}"
+  focus-ring:
+    backgroundColor: "{colors.primary-400}"
+  ask-frnd-pill:
+    backgroundColor: "{colors.primary-600}"
+    textColor: "{colors.text-default}"
+    typography: "{typography.text-sm-medium}"
+    rounded: "{rounded.full}"
+    padding: 12px
+  ai-surface-tint:
+    backgroundColor: "{colors.primary-50}"
+    textColor: "{colors.primary-800}"
+  ai-surface-deep:
+    backgroundColor: "{colors.primary-950}"
+    textColor: "{colors.text-inverse}"
+  light-canvas:
+    backgroundColor: "{colors.grey-50}"
+    textColor: "{colors.text-default}"
+  body-on-light-subtle:
+    backgroundColor: "{colors.grey-50}"
+    textColor: "{colors.text-subtle}"
+  body-on-light-subtlest:
+    backgroundColor: "{colors.grey-200}"
+    textColor: "{colors.text-default}"
+  placeholder-text:
+    backgroundColor: "{colors.surface-input-on-app}"
+    textColor: "{colors.text-inverse-subtlest}"
+  impl-container-translucent-subtlest:
+    backgroundColor: "{colors.container-translucent-subtlest}"
+  impl-container-input:
+    backgroundColor: "{colors.container-input}"
+  impl-nav-hover:
+    backgroundColor: "{colors.nav-hover}"
+  impl-nav-active:
+    backgroundColor: "{colors.nav-active}"
+  icon-button-resting:
+    backgroundColor: "transparent"
+    textColor: "{colors.icon-inverse-subtlest}"
+  status-positive-bg:
+    backgroundColor: "{colors.positive-50}"
+    textColor: "{colors.text-default}"
+  status-positive-emphasis:
+    backgroundColor: "{colors.positive-500}"
+    textColor: "{colors.text-default}"
+  status-negative-bg:
+    backgroundColor: "{colors.negative-50}"
+    textColor: "{colors.text-default}"
+  status-warning-bg:
+    backgroundColor: "{colors.warning-100}"
+    textColor: "{colors.text-default}"
+  status-warning-emphasis:
+    backgroundColor: "{colors.warning-500}"
+    textColor: "{colors.text-default}"
+  delta-aqua:
+    backgroundColor: "{colors.aqua-400}"
+    textColor: "{colors.text-default}"
+  delta-red:
+    backgroundColor: "{colors.red-400}"
+    textColor: "{colors.text-default}"
+  metadata-on-light:
+    backgroundColor: "{colors.app-bg}"
+    textColor: "{colors.text-subtlest}"
+  status-positive-label:
+    backgroundColor: "{colors.app-bg}"
+    textColor: "{colors.positive-600}"
+  danger-zone-heading:
+    backgroundColor: "{colors.app-bg}"
+    textColor: "{colors.negative-500}"
+  danger-zone-body:
+    backgroundColor: "{colors.app-bg}"
+    textColor: "{colors.negative-500}"
+  impl-negative-600:
+    backgroundColor: "{colors.negative-600}"
+  warning-label:
+    backgroundColor: "{colors.app-bg}"
+    textColor: "{colors.warning-600}"
 ---
 
 # frndOS Design System
@@ -425,7 +534,7 @@ Personality traits to preserve:
   campaigns, metrics) and AI moments carry the visual energy.
 - **Glassy, not flat.** Layering is communicated with white translucency and
   background blur rather than borders or heavy shadows.
-- **AI-forward.** The FRnD blue (`primary-500`, "Resolution Blue" in brand
+- **AI-forward.** The FRnD blue (`primary` / `primary-600`, "Resolution Blue" in brand
   language) is reserved for AI entry points (Ask FRnD, greeting headline
   accents) and the single primary action of a screen.
 
@@ -464,7 +573,9 @@ and one evocative blue accent.
   `container-translucent-subtlest` (#ffffff0d) for inputs, chips, and
   secondary buttons; `container-translucent-subtle` (#ffffff26) for hover and
   emphasized states. Combined with background blur these create the glassy
-  feel.
+  feel. In CSS, use the translucent tokens; in component YAML, use the
+  matching `surface-*-on-app` tokens (solid colors composited over `app-bg`)
+  so accessibility checks reflect real dark-canvas appearance.
 - **Text on dark:** `text-inverse` (#f6f6f6) for primary copy,
   `text-inverse-subtle` (#b0b0b0) for supporting copy,
   `text-inverse-subtlest` (#888888) for placeholders and metadata. Icons
@@ -474,9 +585,11 @@ and one evocative blue accent.
   surfaces.
 - **Strokes:** `stroke-default` / `surface-line` (white at 10%) for hairline
   dividers — never opaque grey borders.
-- **FRnD blue (primary-500 #4e9ef8):** The sole interactive accent. Used for
-  the greeting headline, the Ask FRnD pill, focus rings, and links. Deeper
-  steps (600–950) exist for pressed states and light-mode contexts.
+- **FRnD blue (`primary` / `primary-600` #3a7ff7):** The canonical semantic
+  accent from Figma Foundations. Used for the Ask FRnD pill, focus rings, and
+  links. Lighter steps (`primary-400`, `primary-500`) suit hover and highlights;
+  deeper steps (`primary-700`–`primary-950`) exist for pressed states and
+  light-mode contexts.
 - **Semantics:** `positive-500` (#55b88e) for upward deltas and success,
   `negative-500` (#e74136) for errors and the Danger Zone, `warning-*` ambers
   for incomplete-state banners (Studio uses `warning-900` #6a401c as a deep
@@ -644,9 +757,16 @@ a 0px radius except full-bleed imagery inside cards.
 - **Danger Zone.** A clearly separated settings section: `negative-500`
   heading, explanatory line, and `button-danger` — always last on the page.
 
+### Reference components (token anchors)
+
+Lightweight YAML entries that wire the full palette for lint and agent
+discovery. These are not separate product UI — they document where each
+semantic color belongs (`page-canvas`, `ask-frnd-pill`, `link-primary`,
+`delta-aqua`, etc.).
+
 ## Do's and Don'ts
 
-- Do reserve FRnD blue (`primary-500`) for AI moments and at most one
+- Do reserve FRnD blue (`primary` / `primary-600`) for AI moments and at most one
   primary accent per screen; the default high-emphasis button is white.
 - Do build layering with translucent white + blur; don't stack drop shadows
   on the dark canvas.
