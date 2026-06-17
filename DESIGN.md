@@ -3,12 +3,10 @@ version: alpha
 name: frndOS
 description: >
   Dark-first design system for frndOS — an AI-powered brand workspace.
-  Captured from the Brand Settings, Workspace Settings, Studio, and New
-  Navigation Figma files and reconciled with the implemented codebase tokens
-  (globals.css / tailwind.config.ts). Token names mirror the CSS custom
-  properties used in code.
+  Canonical source: FRnD OS Figma libraries (Foundations, Typography, Components).
+  Token names align with Figma variables where exposed; CSS custom properties in
+  globals.css / tailwind.config.ts are noted where code lags Figma.
 colors:
-  # Canvas & surfaces (dark-first)
   app-bg: "#111111"
   card-bg: "#1a1a1a"
   container-light: "#ffffff"
@@ -21,19 +19,16 @@ colors:
   popover-bg: "rgba(26, 26, 26, 0.96)"
   shell-overlay: "rgba(0, 0, 0, 0.42)"
   surface-line: "rgba(255, 255, 255, 0.1)"
-  # Text on dark surfaces (the default in frndOS)
+  stroke-default: "rgba(255, 255, 255, 0.1)"
   text-inverse: "#f6f6f6"
   text-inverse-subtle: "#b0b0b0"
   text-inverse-subtlest: "#888888"
-  # Text on light surfaces (white buttons, light cards)
   text-default: "#111111"
   text-subtle: "#5d5d5d"
   text-subtlest: "#888888"
-  # Icons on dark surfaces
   icon-inverse: "#f6f6f6"
   icon-inverse-subtle: "#d1d1d1"
   icon-inverse-subtlest: "#888888"
-  # Primary (FRnD blue)
   primary-50: "#eff9fe"
   primary-400: "#6dbef9"
   primary-500: "#4e9ef8"
@@ -41,7 +36,6 @@ colors:
   primary-700: "#2d67e9"
   primary-800: "#224eb0"
   primary-950: "#172d59"
-  # Semantic
   positive-50: "#effcf6"
   positive-500: "#55b88e"
   positive-600: "#419170"
@@ -53,40 +47,140 @@ colors:
   warning-500: "#e2b13d"
   warning-600: "#c18a2f"
   warning-900: "#6a401c"
-  # Data accents (vibrant 400s for chips and deltas on dark)
   emerald-400: "#34d399"
   yellow-400: "#facc15"
   yellow-500: "#eab308"
   aqua-400: "#22deee"
   red-400: "#f87171"
-  # Greys
   grey-50: "#f6f6f6"
   grey-100: "#e7e7e7"
   grey-200: "#d1d1d1"
   grey-950: "#111111"
 typography:
+  display-2xl:
+    fontFamily: Geist
+    fontSize: 72px
+    fontWeight: 400
+    lineHeight: 1.2
+    letterSpacing: -0.015em
+  display-2xl-medium:
+    fontFamily: Geist
+    fontSize: 72px
+    fontWeight: 500
+    lineHeight: 1.2
+    letterSpacing: -0.015em
+  display-2xl-bold:
+    fontFamily: Geist
+    fontSize: 72px
+    fontWeight: 700
+    lineHeight: 1.2
+    letterSpacing: -0.015em
+  display-xl:
+    fontFamily: Geist
+    fontSize: 64px
+    fontWeight: 400
+    lineHeight: 1.2
+    letterSpacing: -0.015em
+  display-xl-medium:
+    fontFamily: Geist
+    fontSize: 64px
+    fontWeight: 500
+    lineHeight: 1.2
+    letterSpacing: -0.015em
+  display-xl-bold:
+    fontFamily: Geist
+    fontSize: 64px
+    fontWeight: 700
+    lineHeight: 1.2
+    letterSpacing: -0.015em
+  display-lg:
+    fontFamily: Geist
+    fontSize: 48px
+    fontWeight: 400
+    lineHeight: 1.2
+    letterSpacing: -0.015em
+  display-lg-medium:
+    fontFamily: Geist
+    fontSize: 48px
+    fontWeight: 500
+    lineHeight: 1.2
+    letterSpacing: -0.015em
+  display-lg-bold:
+    fontFamily: Geist
+    fontSize: 48px
+    fontWeight: 700
+    lineHeight: 1.2
+    letterSpacing: -0.015em
   display-md:
-    fontFamily: General Sans Variable
+    fontFamily: Geist
+    fontSize: 40px
+    fontWeight: 400
+    lineHeight: 1.2
+    letterSpacing: -0.015em
+  display-md-medium:
+    fontFamily: Geist
     fontSize: 40px
     fontWeight: 500
     lineHeight: 1.2
     letterSpacing: -0.015em
+  display-md-bold:
+    fontFamily: Geist
+    fontSize: 40px
+    fontWeight: 700
+    lineHeight: 1.2
+    letterSpacing: -0.015em
+  display-sm:
+    fontFamily: Geist
+    fontSize: 32px
+    fontWeight: 400
+    lineHeight: 1.2
+    letterSpacing: -0.015em
+  display-sm-medium:
+    fontFamily: Geist
+    fontSize: 32px
+    fontWeight: 500
+    lineHeight: 1.2
+    letterSpacing: -0.015em
+  display-sm-bold:
+    fontFamily: Geist
+    fontSize: 32px
+    fontWeight: 700
+    lineHeight: 1.2
+    letterSpacing: -0.015em
   display-xs:
-    fontFamily: General Sans Variable
+    fontFamily: Geist
+    fontSize: 24px
+    fontWeight: 400
+    lineHeight: 1.2
+    letterSpacing: -0.015em
+  display-xs-medium:
+    fontFamily: Geist
     fontSize: 24px
     fontWeight: 500
     lineHeight: 1.2
     letterSpacing: -0.015em
+  display-xs-bold:
+    fontFamily: Geist
+    fontSize: 24px
+    fontWeight: 700
+    lineHeight: 1.2
+    letterSpacing: -0.015em
+  text-xl:
+    fontFamily: Geist
+    fontSize: 20px
+    fontWeight: 400
+    lineHeight: 1.4
+    letterSpacing: -0.02em
   text-xl-medium:
     fontFamily: Geist
     fontSize: 20px
     fontWeight: 500
     lineHeight: 1.4
     letterSpacing: -0.02em
-  text-lg-medium:
+  text-xl-bold:
     fontFamily: Geist
-    fontSize: 18px
-    fontWeight: 500
+    fontSize: 20px
+    fontWeight: 700
     lineHeight: 1.4
     letterSpacing: -0.02em
   text-lg:
@@ -95,15 +189,39 @@ typography:
     fontWeight: 400
     lineHeight: 1.4
     letterSpacing: -0.02em
+  text-lg-medium:
+    fontFamily: Geist
+    fontSize: 18px
+    fontWeight: 500
+    lineHeight: 1.4
+    letterSpacing: -0.02em
+  text-lg-bold:
+    fontFamily: Geist
+    fontSize: 18px
+    fontWeight: 700
+    lineHeight: 1.4
+    letterSpacing: -0.02em
+  text-md:
+    fontFamily: Geist
+    fontSize: 16px
+    fontWeight: 400
+    lineHeight: 1.4
+    letterSpacing: -0.01em
   text-md-medium:
     fontFamily: Geist
     fontSize: 16px
     fontWeight: 500
     lineHeight: 1.4
     letterSpacing: -0.01em
-  text-md:
+  text-md-bold:
     fontFamily: Geist
     fontSize: 16px
+    fontWeight: 700
+    lineHeight: 1.4
+    letterSpacing: -0.01em
+  text-sm:
+    fontFamily: Geist
+    fontSize: 14px
     fontWeight: 400
     lineHeight: 1.4
     letterSpacing: -0.01em
@@ -113,22 +231,28 @@ typography:
     fontWeight: 500
     lineHeight: 1.4
     letterSpacing: -0.01em
-  text-sm:
+  text-sm-bold:
     fontFamily: Geist
     fontSize: 14px
-    fontWeight: 400
+    fontWeight: 700
     lineHeight: 1.4
     letterSpacing: -0.01em
+  text-xs:
+    fontFamily: Geist
+    fontSize: 12px
+    fontWeight: 400
+    lineHeight: 1.4
+    letterSpacing: 0em
   text-xs-medium:
     fontFamily: Geist
     fontSize: 12px
     fontWeight: 500
     lineHeight: 1.4
     letterSpacing: 0em
-  text-xs:
+  text-xs-bold:
     fontFamily: Geist
     fontSize: 12px
-    fontWeight: 400
+    fontWeight: 700
     lineHeight: 1.4
     letterSpacing: 0em
 rounded:
@@ -148,6 +272,54 @@ spacing:
   sidebar-width: 200px
   top-bar-height: 72px
 components:
+  avatar-initial-xs:
+    backgroundColor: "{colors.yellow-500}"
+    textColor: "{colors.text-default}"
+    typography: "{typography.text-sm-medium}"
+    rounded: "{rounded.full}"
+    size: 32px
+  avatar-initial-sm:
+    backgroundColor: "{colors.yellow-500}"
+    textColor: "{colors.text-default}"
+    typography: "{typography.text-md-medium}"
+    rounded: "{rounded.full}"
+    size: 40px
+  avatar-initial-md:
+    backgroundColor: "{colors.yellow-500}"
+    textColor: "{colors.text-default}"
+    typography: "{typography.text-xl-medium}"
+    rounded: "{rounded.full}"
+    size: 48px
+  avatar-initial-lg:
+    backgroundColor: "{colors.yellow-500}"
+    textColor: "{colors.text-default}"
+    typography: "{typography.display-xs-medium}"
+    rounded: "{rounded.full}"
+    size: 56px
+  avatar-initial-xl:
+    backgroundColor: "{colors.yellow-500}"
+    textColor: "{colors.text-default}"
+    typography: "{typography.display-sm-medium}"
+    rounded: "{rounded.full}"
+    size: 64px
+  chip:
+    backgroundColor: "{colors.container-translucent-subtlest}"
+    textColor: "{colors.text-inverse-subtle}"
+    typography: "{typography.text-xs-medium}"
+    rounded: "{rounded.full}"
+    padding: 6px
+  tab-rounded-active:
+    backgroundColor: "{colors.container-light}"
+    textColor: "{colors.text-default}"
+    typography: "{typography.text-sm-medium}"
+    rounded: "{rounded.full}"
+    padding: 8px
+  tab-rounded-inactive:
+    backgroundColor: "transparent"
+    textColor: "{colors.text-inverse-subtle}"
+    typography: "{typography.text-sm-medium}"
+    rounded: "{rounded.full}"
+    padding: 8px
   button-primary:
     backgroundColor: "{colors.container-light}"
     textColor: "{colors.text-default}"
@@ -212,12 +384,6 @@ components:
   menu-item-active:
     backgroundColor: "{colors.nav-active}"
     textColor: "{colors.text-inverse}"
-  chip:
-    backgroundColor: "{colors.container-translucent-subtlest}"
-    textColor: "{colors.text-inverse-subtle}"
-    typography: "{typography.text-xs-medium}"
-    rounded: "{rounded.full}"
-    padding: 6px
   status-badge-positive:
     backgroundColor: "{colors.emerald-400}"
     textColor: "{colors.text-default}"
@@ -249,7 +415,7 @@ components:
 
 frndOS is an AI-powered brand workspace ("What would you like to work on?").
 The interface reads as a calm, dark operating system: a near-black canvas,
-glassy translucent surfaces, and restrained typography. Density is
+glassy translucent surfaces, and restrained Geist typography. Density is
 professional but never cramped — generous vertical rhythm, hairline
 separators, and a single bright accent.
 
@@ -266,6 +432,23 @@ Personality traits to preserve:
 When a rule or token is not explicitly defined, default to: dark surface,
 translucent white container, Geist Medium label, pill or 12–16px radius, and
 no shadow.
+
+**Figma sources (canonical):**
+
+- Foundations — colors, spacing, radius, elevation, blur
+- Typography (FRnD OS) — Geist display and text scales
+- Components (FRnD OS) — avatars, chips, tabs, buttons, inputs, and more
+
+**Code drift (needs verification / follow-up):**
+
+- `globals.css` and `tailwind.config.ts` do not yet expose the full Figma
+  typography scale or avatar primitives.
+- Foundations color/spacing/effects were not fully exposed via the provided
+  Foundations URL node; values here use Figma variable names where discovered
+  and existing code tokens as baseline. Re-verify when a node-specific
+  Foundations URL is available.
+- Prior docs referenced General Sans Variable for display; Figma Typography
+  now uses Geist for both display and text.
 
 ## Colors
 
@@ -286,6 +469,11 @@ and one evocative blue accent.
   `text-inverse-subtle` (#b0b0b0) for supporting copy,
   `text-inverse-subtlest` (#888888) for placeholders and metadata. Icons
   follow the parallel `icon-inverse-*` scale.
+- **Text on light:** `text-default` (#111111) on white pills, badges, and
+  avatar initials. `text-subtle` (#5d5d5d) for secondary copy on light
+  surfaces.
+- **Strokes:** `stroke-default` / `surface-line` (white at 10%) for hairline
+  dividers — never opaque grey borders.
 - **FRnD blue (primary-500 #4e9ef8):** The sole interactive accent. Used for
   the greeting headline, the Ask FRnD pill, focus rings, and links. Deeper
   steps (600–950) exist for pressed states and light-mode contexts.
@@ -299,28 +487,49 @@ and one evocative blue accent.
 
 Light mode exists in parts of the product (early Workspace Settings screens
 use `grey-50` #f6f6f6 canvas with `text-default` #111111 and `text-subtle`
-#5d5d5d), but **dark is normative**: all six reference designs are dark, and
+#5d5d5d), but **dark is normative**: reference designs are dark-first, and
 the tokens above are the canonical values.
 
 ## Typography
 
-Two typefaces, two jobs:
+**Geist** is the sole product typeface — both display and UI text. The Figma
+Typography library defines two scales:
 
-- **Geist** carries all UI text — navigation, labels, body copy, tables,
-  inputs. Sizes run 12px (`text-xs`) to 20px (`text-xl-medium`), line-height
-  1.4, with tightening letter-spacing as sizes grow (0 at 12px, -0.01em at
-  14–16px, -0.02em at 18–20px).
-- **General Sans Variable** is the display voice — the "What would you like
-  to work on?" greeting (`display-md`, 40px) and page-level headings
-  (`display-xs`, 24px) at line-height 1.2 and -0.015em tracking.
+### Display scale (line-height 1.2, letter-spacing -0.015em)
 
-Only two weights are used anywhere in the product chrome: **Regular (400)**
-for body and values, **Medium (500)** for labels, headings, and buttons.
-Never use bold (700) in UI chrome.
+| Token | Size | Weights |
+|-------|------|---------|
+| `display-2xl` | 72px | Regular, Medium, Bold |
+| `display-xl` | 64px | Regular, Medium, Bold |
+| `display-lg` | 48px | Regular, Medium, Bold |
+| `display-md` | 40px | Regular, Medium, Bold |
+| `display-sm` | 32px | Regular, Medium, Bold |
+| `display-xs` | 24px | Regular, Medium, Bold |
 
-Note: fonts visible inside Brand Identity screens (e.g. Poppins for "Ultra
-Milk") are *user brand content* managed by the customer — they are never used
-for frndOS product UI.
+Use for page titles, greeting headlines ("What would you like to work on?"),
+and hero moments. Default to **Medium (500)** for headings.
+
+### Text scale (line-height 1.4)
+
+| Token | Size | Letter-spacing | Weights |
+|-------|------|----------------|---------|
+| `text-xl` | 20px | -0.02em | Regular, Medium, Bold |
+| `text-lg` | 18px | -0.02em | Regular, Medium, Bold |
+| `text-md` | 16px | -0.01em | Regular, Medium, Bold |
+| `text-sm` | 14px | -0.01em | Regular, Medium, Bold |
+| `text-xs` | 12px | 0 | Regular, Medium, Bold |
+
+Use for navigation, labels, body copy, tables, inputs, and metadata.
+
+### Weight policy
+
+- **Product chrome:** Regular (400) for body and values; Medium (500) for
+  labels, headings, buttons, and navigation.
+- **Bold (700):** Documented in tokens for parity with Figma. Reserve Bold
+  for authored/markdown content emphasis (headings inside AI messages,
+  article body, blockquotes). Do not use Bold for routine UI chrome.
+- **Never** use user-brand fonts (e.g. Poppins for "Ultra Milk") in product
+  UI — those belong only inside brand-content previews.
 
 ## Layout
 
@@ -355,7 +564,8 @@ Depth is communicated through **translucency and blur, not shadow stacks**:
   with background blur — 32px (`blur/container/default`) for major surfaces
   like the command bar and popovers, 16px (`blur/container/shallow`) for
   small chips and controls.
-- Hairline separators use `surface-line` (white at 10%) instead of borders.
+- Hairline separators use `surface-line` / `stroke-default` (white at 10%)
+  instead of borders.
 - A single shadow exists for truly raised elements (dragged cards, floating
   buttons): `0px 4px 8px rgba(0, 0, 0, 0.4)` (Figma `elevation/raised`).
 - The scrim for modals and overlays is `shell-overlay` (black at 42%).
@@ -371,13 +581,29 @@ The shape language is **soft and pill-forward**:
 - `sm` (12px) for inputs, banners, and small cards.
 - `md` (16px) for cards, panels, and the command bar.
 - `lg` (24px) for large feature surfaces and modal sheets.
-- `full` (1000px) — the pill — for every button, chip, badge, search field
-  in the top bar, the Ask FRnD control, and the dock.
+- `full` (1000px) — the pill — for every button, chip, badge, avatar, search
+  field in the top bar, the Ask FRnD control, and the dock.
 
 Corners never mix sharp and rounded in the same view; nothing in frndOS has
 a 0px radius except full-bleed imagery inside cards.
 
 ## Components
+
+### Design-system primitives (Figma Components library)
+
+- **Avatars (Initial).** Circular pills at five sizes: `xs` 32px, `sm` 40px,
+  `md` 48px, `lg` 56px, `xl` 64px. Initial variant uses `yellow-500` fill
+  with `text-default` initials. Typography scales with size: `text-sm-medium`
+  at xs up through `display-sm-medium` at xl. Photo variant uses the same
+  size scale with a circular crop.
+- **Chips.** Pill, translucent `container-translucent-subtlest` fill,
+  `text-inverse-subtle` label in `text-xs-medium`. Used for filters,
+  command-bar destinations, and brand-DNA tags.
+- **Tab Rounded.** Segmented pill group: active segment is a white pill
+  (`container-light`) with `text-default`; inactive segments are transparent
+  with `text-inverse-subtle`. Both use `text-sm-medium`.
+
+### frndOS app patterns (product screens)
 
 - **Buttons.** `button-primary` is a white pill with dark text — on a dark
   canvas, white *is* the highest-emphasis color. Hover dims to `grey-100`;
@@ -398,9 +624,6 @@ a 0px radius except full-bleed imagery inside cards.
   label above in Geist Medium 14px with helper text in
   `text-inverse-subtlest` 12px. Settings fields stack label-left /
   control-right in wide layouts.
-- **Chips & tags.** Pill, translucent fill, 12px Medium text. Used for
-  brand-DNA values (audiences, competitors), command-bar destinations, and
-  filters.
 - **Status badges.** Solid vibrant pills (`emerald-400` positive,
   `yellow-400` warning/monitoring) with dark text — used on brand cards
   (Low / Medium / Monitoring) and metric deltas (+4%, +0.8%).
@@ -416,8 +639,8 @@ a 0px radius except full-bleed imagery inside cards.
   metadata in `text-inverse-subtle`. Header row uses 12px Medium
   `text-inverse-subtlest`. Pagination pills and a per-page selector sit in a
   footer row.
-- **Segmented controls.** Pill group (Internal Team / Guest Member): active
-  segment is a white pill with dark text, inactive segments translucent.
+- **Segmented controls.** Same pattern as Tab Rounded — active segment white
+  pill, inactive translucent.
 - **Danger Zone.** A clearly separated settings section: `negative-500`
   heading, explanatory line, and `button-danger` — always last on the page.
 
@@ -428,16 +651,19 @@ a 0px radius except full-bleed imagery inside cards.
 - Do build layering with translucent white + blur; don't stack drop shadows
   on the dark canvas.
 - Do use pills (`rounded.full`) for all interactive chrome — buttons, chips,
-  badges, segmented controls.
+  badges, avatars, segmented controls.
 - Do keep deltas and statuses on the vibrant 400 accents with dark text for
   contrast.
-- Don't use font weights other than 400 and 500 in product chrome.
+- Do use Geist for all product typography; display and text scales share one
+  family per Figma.
+- Do reserve Bold (700) for authored/markdown content; default UI chrome to
+  Regular and Medium only.
 - Don't use user-brand fonts (e.g. Poppins) or colors for frndOS UI — they
   belong only inside brand-content previews.
 - Don't use `negative-500` outside errors and destructive actions; the
   Danger Zone pattern is its only settings appearance.
-- Don't introduce opaque grey borders; separate with `surface-line`
-  hairlines or spacing instead.
+- Don't introduce opaque grey borders; separate with `surface-line` /
+  `stroke-default` hairlines or spacing instead.
 - Do maintain WCAG AA contrast: body text on `app-bg` uses `text-inverse`
   or `text-inverse-subtle`; `text-inverse-subtlest` is for metadata and
   placeholders only, never paragraphs.
