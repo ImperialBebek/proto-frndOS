@@ -20,11 +20,12 @@ import {
 } from "@phosphor-icons/react";
 import { usePitch } from "@/context/PitchProvider";
 import {
-  IKEA_DECODE,
+  getCaseDecode,
   PITCH_ROLE_COLOR,
   PITCH_ROLE_LABEL,
   PITCH_STAGES,
   PITCH_WORK_HUB_ID,
+  type PitchCaseDecode,
   type PitchStageDef,
   type PitchStageId,
   type PitchStepDef,
@@ -41,8 +42,10 @@ import {
 import { WorkHubCanvas } from "./WorkHubCanvas";
 import { WorkTrackCanvas } from "./WorkTrackCanvas";
 import { PitchExportCanvas } from "./PitchExportCanvas";
+import { AiModeToggle } from "./AiModeToggle";
+import { PlanEditorModal } from "./PlanEditorModal";
+import type { BriefDecoderContext } from "./briefDecoderContext";
 
-const BRIEF_SECTION_COUNT = IKEA_DECODE.businessBrief.length;
 const DECODE_TICK_MS = 1100;
 
 type StageState = "approved" | "active" | "available" | "locked";
@@ -62,6 +65,7 @@ type PitchCanvasProps = {
   onHamburgerLeave: () => void;
   chatOpen: boolean;
   onChatToggle: () => void;
+  onBriefDecoderContextChange?: (context: BriefDecoderContext | null) => void;
 };
 
 export function PitchCanvas({
@@ -77,6 +81,7 @@ export function PitchCanvas({
   onHamburgerLeave,
   chatOpen,
   onChatToggle,
+  onBriefDecoderContextChange,
 }: PitchCanvasProps) {
   const {
     getPitch,
@@ -92,10 +97,16 @@ export function PitchCanvas({
     reopenStep,
     markDecoded,
     isStepApproved,
+    getPitchCaseId,
+    updatePitchTracks,
+    getTrackSubProgress,
   } = usePitch();
 
   const pitch = getPitch(pitchId);
   const steps = getStepsForPitch(pitchId);
+  const decode: PitchCaseDecode = getCaseDecode(getPitchCaseId(pitchId));
+  const briefSectionCount = decode.businessBrief.length;
+  const [planEditorOpen, setPlanEditorOpen] = useState(false);
 
   const isHub = stepId === PITCH_WORK_HUB_ID;
   const effectiveStepId =
@@ -124,7 +135,7 @@ export function PitchCanvas({
     const interval = window.setInterval(() => {
       current += 1;
       setRevealCount(current);
-      if (current >= BRIEF_SECTION_COUNT) {
+      if (current >= briefSectionCount) {
         window.clearInterval(interval);
         window.setTimeout(() => markDecoded(pitchId), 800);
       }
@@ -134,7 +145,7 @@ export function PitchCanvas({
   }, [isDecoding, pitchId]);
 
   const decodeInProgress =
-    isDecoding && (revealCount ?? 0) < BRIEF_SECTION_COUNT;
+    isDecoding && (revealCount ?? 0) < briefSectionCount;
 
   /* ---------------- step-per-screen entry transition ---------------- */
   const screenRef = useRef<HTMLDivElement>(null);
@@ -383,6 +394,7 @@ export function PitchCanvas({
         </nav>
 
         <div className="flex min-w-0 flex-1 items-center justify-end gap-2">
+          <AiModeToggle compact />
           {/* Approve cluster */}
           {isHub || !step ? null : step.kind === "decking" ? (
             status === "locked" ? (
@@ -452,7 +464,11 @@ export function PitchCanvas({
       {/* ---------------- focused step screen ---------------- */}
       <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
         <div ref={screenRef} className="flex-1 px-8 py-8">
-          <div className="mx-auto w-full max-w-5xl">
+          <div
+            className={`mx-auto w-full ${
+              step?.kind === "brief-decoder" ? "max-w-7xl" : "max-w-5xl"
+            }`}
+          >
             {!isHub && step && !isTrack && step.kind !== "decking" && (
               <div className="mb-6">
                 <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-text-inverse-subtlest">
@@ -497,12 +513,16 @@ export function PitchCanvas({
               <StepBody
                 stepStatus={status}
                 step={step}
+                decode={decode}
                 revealCount={isDecoding ? (revealCount ?? 0) : undefined}
                 blockingDeps={blockingDeps}
                 pitchId={pitchId}
+                caseId={getPitchCaseId(pitchId)}
                 activeSubStepId={activeSubStep?.id ?? null}
                 onSubStepSelect={onSubStepSelect}
                 onBackToHub={() => onNavigateStep(PITCH_WORK_HUB_ID)}
+                onEditPlan={() => setPlanEditorOpen(true)}
+                onBriefDecoderContextChange={onBriefDecoderContextChange}
               />
             ) : null}
           </div>
@@ -550,6 +570,22 @@ export function PitchCanvas({
           confirmLabel="Re-open step"
           onCancel={() => setReopenModalOpen(false)}
           onConfirm={handleReopen}
+        />
+      )}
+
+      {planEditorOpen && (
+        <PlanEditorModal
+          decode={decode}
+          currentSteps={steps}
+          getTrackSubProgress={(trackId) =>
+            getTrackSubProgress(pitchId, trackId)
+          }
+          onClose={() => setPlanEditorOpen(false)}
+          onSave={(tracks) => {
+            updatePitchTracks(pitchId, tracks);
+            setPlanEditorOpen(false);
+            onNavigateStep("pitch-plan");
+          }}
         />
       )}
     </div>
@@ -646,21 +682,29 @@ function StageStepperItem({
 function StepBody({
   stepStatus,
   step,
+  decode,
   revealCount,
   blockingDeps,
   pitchId,
+  caseId,
   activeSubStepId,
   onSubStepSelect,
   onBackToHub,
+  onEditPlan,
+  onBriefDecoderContextChange,
 }: {
   stepStatus: "locked" | "available" | "approved";
   step: PitchStepDef;
+  decode: PitchCaseDecode;
   revealCount?: number;
   blockingDeps: string[];
   pitchId: string;
+  caseId: string;
   activeSubStepId: string | null;
   onSubStepSelect: (subStepId: string) => void;
   onBackToHub: () => void;
+  onEditPlan: () => void;
+  onBriefDecoderContextChange?: (context: BriefDecoderContext | null) => void;
 }) {
   if (step.kind === "decking") {
     return <PitchExportCanvas pitchId={pitchId} />;
@@ -684,15 +728,22 @@ function StepBody({
 
   switch (step.kind) {
     case "brief-decoder":
-      return <BriefDecoderCanvas revealedSections={revealCount} />;
+      return (
+        <BriefDecoderCanvas
+          pitchId={pitchId}
+          caseId={caseId}
+          revealedSections={revealCount}
+          onContextChange={onBriefDecoderContextChange}
+        />
+      );
     case "pitch-plan":
-      return <PitchPlanCanvas />;
+      return <PitchPlanCanvas decode={decode} onEditPlan={onEditPlan} />;
     case "research-4c":
-      return <Research4CCanvas />;
+      return <Research4CCanvas decode={decode} />;
     case "comm-strategy":
-      return <CommStrategyCanvas />;
+      return <CommStrategyCanvas decode={decode} />;
     case "big-ideas":
-      return <BigIdeasCanvas />;
+      return <BigIdeasCanvas decode={decode} />;
     default:
       return null;
   }

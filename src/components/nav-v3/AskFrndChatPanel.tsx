@@ -12,6 +12,7 @@ import { ChatPanelHeader } from "./chat/ChatPanelHeader";
 import { useChatThread } from "./chat/useChatThread";
 import { ChatMessageList } from "./chat/ChatMessageList";
 import { ChatComposer } from "./chat/ChatComposer";
+import type { BriefDecoderContext } from "./pitch/briefDecoderContext";
 
 const CONTENT_SLIDE = 16;
 
@@ -20,6 +21,7 @@ export type PitchChatContext = {
   stepLabel: string;
   pills: string[];
   script: PitchChatScriptMessage[];
+  briefDecoder?: BriefDecoderContext | null;
 };
 
 type AskFrndChatPanelProps = {

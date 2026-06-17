@@ -11,8 +11,78 @@ import {
   sortTeamSpecialists,
 } from "@/data/agentsStatic";
 import type { PitchChatContext } from "../AskFrndChatPanel";
+import { readFieldOverride } from "../pitch/EditableAIItem";
 
 type Message = ChatMessage;
+
+function buildBriefDecoderProposal(
+  prompt: string,
+  pitchContext?: PitchChatContext | null
+): Pick<Message, "text" | "proposals"> | null {
+  const brief = pitchContext?.briefDecoder;
+  if (!brief) return null;
+
+  const target = brief.focusedField ?? brief.defaultField;
+  if (!target) {
+    return {
+      text: `I'm in the ${brief.variantLabel} view with the ${brief.lens} lens active. Pick a field in the Business Briefcase, Decision Makers, or Strategy to Win and I can propose a targeted edit.`,
+    };
+  }
+
+  const wantsEdit =
+    /improve|sharpen|rewrite|edit|make|stronger|clearer|pitch|win|this|field|objective|hook|strategy/i.test(
+      prompt
+    );
+
+  if (!wantsEdit) {
+    return {
+      text: `I'm tracking ${target.sectionRef}: ${target.label} in the ${brief.lens} lens. I can explain the read or propose a sharper version when you ask for an edit.`,
+    };
+  }
+
+  const currentValue = readFieldOverride(target.fieldKey) ?? target.value;
+  const proposedValue = makeBriefProposalValue(
+    currentValue,
+    target.label,
+    target.sectionRef,
+    brief.lens
+  );
+
+  return {
+    text: `I tightened ${target.label} for the ${brief.lens} lens. Review this proposed change before applying it.`,
+    proposals: [
+      {
+        id: `proposal-${Date.now()}`,
+        fieldKey: target.fieldKey,
+        label: target.label,
+        currentValue,
+        proposedValue,
+        sectionRef: target.sectionRef,
+      },
+    ],
+  };
+}
+
+function makeBriefProposalValue(
+  currentValue: string,
+  label: string,
+  sectionRef: string,
+  lens: string
+) {
+  const trimmed = currentValue.replace(/\s+/g, " ").trim();
+  const base = trimmed.replace(/[.。]$/, "");
+
+  if (/hook/i.test(label) || /Decision Makers/i.test(sectionRef)) {
+    return `${base} — framed as a direct reason to say yes in the room, with the ${lens} lens' risk level made explicit.`;
+  }
+  if (/angle|Strategy to Win/i.test(label) || /Strategy to Win/i.test(sectionRef)) {
+    return `${base} — turned into a pitch-room move with a concrete proof point, so the strategy feels ownable instead of theoretical.`;
+  }
+  if (/objective/i.test(label)) {
+    return `${base} — clarified as a business outcome, a brand shift, and a measurable reason the client should choose this route.`;
+  }
+  return `${base} — sharpened for the ${lens} lens with clearer client value, stronger pitch language, and less summary tone.`;
+}
 
 export function useChatThread({
   open,
@@ -200,11 +270,17 @@ export function useChatThread({
       }
 
       const pitchReply = pitchScriptRef.current;
+      const briefDecoderReply = buildBriefDecoderProposal(
+        nextText,
+        pitchReply
+      );
       const reply: Message = pitchReply
         ? {
             id: `frnd-${Date.now()}`,
             role: "agent",
-            text: getPitchChatReply(pitchReply.stepLabel),
+            text:
+              briefDecoderReply?.text ?? getPitchChatReply(pitchReply.stepLabel),
+            proposals: briefDecoderReply?.proposals,
             agentName: "FRND",
             agentColor: "#B8B8B8",
           }

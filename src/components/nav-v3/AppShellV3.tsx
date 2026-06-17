@@ -54,6 +54,7 @@ import { AgentsBuilderWrapper } from "@/components/agents/AgentsBuilderWrapper";
 import { PitchListPage } from "./pitch/PitchListPage";
 import { PitchCanvas } from "./pitch/PitchCanvas";
 import { NewPitchPage } from "./pitch/NewPitchPage";
+import type { BriefDecoderContext } from "./pitch/briefDecoderContext";
 import {
   V3_CARD_RADIUS,
   V3_SIDEBAR_DOCK_WIDTH,
@@ -133,6 +134,8 @@ export function AppShellV3() {
   const [historyScopedFilter, setHistoryScopedFilter] = useState<
     HistoryFilter | undefined
   >(undefined);
+  const [briefDecoderContext, setBriefDecoderContext] =
+    useState<BriefDecoderContext | null>(null);
 
   const {
     activeConversationId,
@@ -298,6 +301,8 @@ export function AppShellV3() {
     const decoding = Boolean(
       activePitch.newlyCreated && activePitchStepId === "brief-decoder"
     );
+    const isBriefDecoder = activePitchStepId === "brief-decoder";
+    const activeBriefContext = isBriefDecoder ? briefDecoderContext : null;
     const subStepId =
       stepDef?.kind === "track" ? activePitchSubStepId : null;
     const subStepLabel = subStepId
@@ -305,9 +310,39 @@ export function AppShellV3() {
           (sub) => sub.id === subStepId
         )?.label
       : undefined;
+    const briefFocus = activeBriefContext?.focusedField;
+    const briefPills = activeBriefContext
+      ? [
+          activeBriefContext.variantLabel,
+          `${activeBriefContext.lens} lens`,
+          briefFocus ? `Focus: ${briefFocus.label}` : "Briefcase overview",
+        ]
+      : [];
+    const briefScript =
+      activeBriefContext && isBriefDecoder
+        ? [
+            {
+              id: "bd-context-1",
+              text: `I'm reading this as the ${activeBriefContext.variantLabel} view with the ${activeBriefContext.lens} lens active.`,
+              delay: 450,
+            },
+            {
+              id: "bd-context-2",
+              text: briefFocus
+                ? `Focused on ${briefFocus.sectionRef}: ${briefFocus.label}. Ask me to sharpen this and I can propose an edit you can apply.`
+                : "Business Briefcase, Decision Makers, and Strategy to Win are all in context. Ask me to sharpen a field and I can propose an edit you can apply.",
+              delay: 900,
+            },
+          ]
+        : null;
+
     return {
       key: `${pitchRoute.pitchId}:${activePitchStepId}${
         subStepId ? `:${subStepId}` : ""
+      }${
+        activeBriefContext
+          ? `:${activeBriefContext.variant}:${activeBriefContext.optionId}:${briefFocus?.fieldKey ?? "overview"}`
+          : ""
       }`,
       stepLabel: subStepLabel
         ? `${stepLabelBase} · ${subStepLabel}`
@@ -316,17 +351,19 @@ export function AppShellV3() {
         activePitch.brand,
         `${stepLabelBase} context`,
         decoding ? "Decoding brief…" : "Pipeline synced",
+        ...briefPills,
       ],
-      script: decoding
+      script: briefScript ?? (decoding
         ? PITCH_DECODE_SCRIPT
         : getPitchStepScript(
             activePitchStepId,
             subStepId ?? undefined,
             stepDef
-          ),
+          )),
+      briefDecoder: activeBriefContext,
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pitchRoute?.view === "canvas" ? pitchRoute.pitchId : null, activePitchStepId, activePitchSubStepId, activePitch?.id]);
+  }, [pitchRoute?.view === "canvas" ? pitchRoute.pitchId : null, activePitchStepId, activePitchSubStepId, activePitch?.id, briefDecoderContext]);
 
   const shellFloating = sidebarOpen || dockedChatOpen;
 
@@ -771,6 +808,7 @@ export function AppShellV3() {
     onFooterSelect: handleFooterSelect,
     activePitchId: isPitchCanvas && pitchRoute?.view === "canvas" ? pitchRoute.pitchId : null,
     activePitchStepId,
+    activePitchSubStepId,
     onPitchStepSelect: handlePitchStepSelect,
     onBackToPitchList: handleBackToPitchList,
   };
@@ -870,6 +908,7 @@ export function AppShellV3() {
                 onHamburgerLeave={scheduleCloseFloating}
                 chatOpen={chatDisplayMode !== "closed"}
                 onChatToggle={handlePitchChatToggle}
+                onBriefDecoderContextChange={setBriefDecoderContext}
               />
             ) : pitchRoute?.view === "new" ? (
               <NewPitchPage

@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { Robot, X } from "@phosphor-icons/react";
-import type { ChatMessage } from "@/data/chatStatic";
+import { useEffect, useRef, useState } from "react";
+import { Check, Robot, X } from "@phosphor-icons/react";
+import type { ChatMessage, ChatProposal } from "@/data/chatStatic";
 import type { Agent } from "@/data/agentsStatic";
 import { PersonaAvatar } from "@/components/agents/PersonaAvatar";
 import { getPersonaPresentation } from "@/data/agentsStatic";
 import type { PitchChatContext } from "../AskFrndChatPanel";
+import { writeFieldOverride } from "../pitch/EditableAIItem";
 
 type ChatMessageListProps = {
   messages: ChatMessage[];
@@ -34,6 +35,9 @@ export function ChatMessageList({
   layout = "panel",
 }: ChatMessageListProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [dismissedProposals, setDismissedProposals] = useState<Set<string>>(
+    new Set()
+  );
   const isFullscreen = layout === "fullscreen";
   const maxBubble = isFullscreen ? "max-w-[90%]" : "max-w-[90%]";
 
@@ -208,6 +212,28 @@ export function ChatMessageList({
                       </div>
                     )}
                     <div className="whitespace-pre-line">{message.text}</div>
+                    {message.proposals?.map((proposal) =>
+                      dismissedProposals.has(proposal.id) ? null : (
+                        <ChatProposalCard
+                          key={proposal.id}
+                          proposal={proposal}
+                          onApply={() => {
+                            writeFieldOverride(
+                              proposal.fieldKey,
+                              proposal.proposedValue
+                            );
+                            setDismissedProposals((prev) =>
+                              new Set(prev).add(proposal.id)
+                            );
+                          }}
+                          onDismiss={() =>
+                            setDismissedProposals((prev) =>
+                              new Set(prev).add(proposal.id)
+                            )
+                          }
+                        />
+                      )
+                    )}
                   </div>
                 </div>
               ))}
@@ -232,5 +258,48 @@ export function ChatMessageList({
         </div>
       </div>
     </>
+  );
+}
+
+function ChatProposalCard({
+  proposal,
+  onApply,
+  onDismiss,
+}: {
+  proposal: ChatProposal;
+  onApply: () => void;
+  onDismiss: () => void;
+}) {
+  return (
+    <div className="mt-3 rounded-md border border-sky-400/25 bg-sky-500/[0.08] p-3">
+      <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-sky-200/80">
+        Proposed change · {proposal.sectionRef}
+      </p>
+      <p className="mt-1 text-[10px] leading-relaxed text-text-inverse-subtlest line-through opacity-60">
+        {proposal.currentValue.slice(0, 140)}
+        {proposal.currentValue.length > 140 ? "..." : ""}
+      </p>
+      <p className="mt-1.5 text-xs leading-relaxed text-text-inverse">
+        {proposal.proposedValue}
+      </p>
+      <div className="mt-2.5 flex items-center gap-2">
+        <button
+          type="button"
+          onClick={onApply}
+          className="inline-flex items-center gap-1 rounded-full bg-white px-2.5 py-1 text-[10px] font-medium text-black transition hover:bg-white/90"
+        >
+          <Check size={10} weight="bold" />
+          Apply
+        </button>
+        <button
+          type="button"
+          onClick={onDismiss}
+          className="inline-flex items-center gap-1 rounded-full border border-line px-2.5 py-1 text-[10px] font-medium text-text-inverse-subtle transition hover:text-text-inverse"
+        >
+          <X size={10} />
+          Dismiss
+        </button>
+      </div>
+    </div>
   );
 }

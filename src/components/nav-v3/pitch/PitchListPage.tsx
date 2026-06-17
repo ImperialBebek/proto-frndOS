@@ -1,19 +1,9 @@
-/** PROTOTYPE Pitch list page — all pitches dashboard (frndOS Campaign Pitch) */
+/** PROTOTYPE Pitch list page — Figma 7141:2030 */
 
 "use client";
 
 import { useMemo, useState } from "react";
-import {
-  ArrowsDownUp,
-  CalendarBlank,
-  CheckCircle,
-  Cpu,
-  FileText,
-  Files,
-  MagnifyingGlass,
-  Plus,
-  Timer,
-} from "@phosphor-icons/react";
+import { FunnelSimple, MagnifyingGlass, Plus } from "@phosphor-icons/react";
 import { usePitch } from "@/context/PitchProvider";
 import {
   PITCH_STAGES,
@@ -100,60 +90,24 @@ export function PitchListPage({
   };
 
   return (
-    <div className="flex flex-1 flex-col overflow-y-auto px-8 py-10">
-      <div className="mx-auto w-full max-w-6xl space-y-8">
-        <section className="flex flex-wrap items-end justify-between gap-6">
-          <div className="max-w-2xl">
-            <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-text-inverse-subtle">
-              frndOS Pitch
-            </p>
-            <h1 className="mt-3 text-3xl font-semibold text-text-inverse lg:text-4xl">
-              Campaign Pitches
-            </h1>
-            <p className="mt-3 max-w-xl text-base leading-relaxed text-text-inverse-subtle">
-              Upload a client brief, let frndOS decode it into a pitch plan, and
-              run the full pipeline with a 2-person team in under 2 hours.
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={onStartNewPitch}
-            className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-medium text-black transition hover:bg-white/90"
-          >
-            <Plus size={16} weight="bold" />
-            Start New Pitch
-          </button>
-        </section>
-
-        <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-          <StatCard
-            icon={<Timer size={16} className="text-sky-400" />}
-            label="Active pitches"
-            value={String(counts.ongoing)}
-          />
-          <StatCard
-            icon={<CheckCircle size={16} className="text-emerald-400" />}
+    <div className="flex flex-1 flex-col overflow-y-auto p-16">
+      <div className="flex w-full flex-col gap-8">
+        <section className="grid grid-cols-2 gap-2 lg:grid-cols-4">
+          <MetricCard label="Active Pitches" value={String(counts.ongoing)} />
+          <MetricCard
             label="Finished this quarter"
             value={String(counts.finished)}
           />
-          <StatCard
-            icon={<CalendarBlank size={16} className="text-amber-400" />}
+          <MetricCard
             label="Nearest deadline"
-            value={
-              nearestDeadline ? `${nearestDeadline.daysLeft} days` : "—"
-            }
-            hint={nearestDeadline?.brand}
+            value={nearestDeadline ? `${nearestDeadline.daysLeft} days` : "—"}
           />
-          <StatCard
-            icon={<Files size={16} className="text-text-inverse-subtle" />}
-            label="Drafts waiting"
-            value={String(counts.draft)}
-          />
+          <MetricCard label="Drafts waiting" value={String(counts.draft)} />
         </section>
 
-        <section>
-          <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-1.5">
+        <section className="flex flex-col gap-8">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex items-center rounded-rounded">
               {FILTERS.map((item) => {
                 const isActive = filter === item.id;
                 return (
@@ -161,47 +115,52 @@ export function PitchListPage({
                     key={item.id}
                     type="button"
                     onClick={() => setFilter(item.id)}
-                    className={`rounded-full px-3 py-1.5 text-xs font-medium transition ${
+                    className={`h-8 rounded-rounded px-3 text-sm font-medium tracking-[-0.14px] transition ${
                       isActive
-                        ? "bg-white text-black"
-                        : "border border-line text-text-inverse-subtle hover:text-text-inverse"
+                        ? "bg-white text-text-default shadow-[0_4px_4px_rgba(0,0,0,0.4)]"
+                        : "text-text-inverse hover:text-text-inverse"
                     }`}
                   >
                     {item.label}
-                    <span className="ml-1.5 font-mono text-[10px] opacity-60">
-                      {counts[item.id]}
-                    </span>
                   </button>
                 );
               })}
             </div>
 
-            <div className="flex items-center gap-2">
-              <div className="flex h-8 items-center gap-2 rounded-full border border-line px-3">
+            <div className="flex flex-wrap items-center gap-6">
+              <div className="flex h-10 w-[264px] items-center gap-3 rounded-md bg-[var(--container-input)] px-3 backdrop-blur-shallow">
                 <MagnifyingGlass
-                  size={14}
-                  className="text-text-inverse-subtlest"
+                  size={20}
+                  className="shrink-0 text-text-inverse-subtlest"
                 />
                 <input
                   value={search}
                   onChange={(event) => setSearch(event.target.value)}
                   placeholder="Search pitches..."
-                  className="w-36 bg-transparent text-xs text-text-inverse outline-none placeholder:text-text-inverse-subtlest"
+                  className="min-w-0 flex-1 bg-transparent text-sm tracking-[-0.14px] text-text-inverse outline-none placeholder:text-text-inverse-subtlest"
                 />
               </div>
               <button
                 type="button"
                 onClick={cycleSort}
-                className="inline-flex h-8 items-center gap-1.5 rounded-full border border-line px-3 text-xs font-medium text-text-inverse-subtle transition hover:text-text-inverse"
+                className="inline-flex h-8 items-center gap-2 rounded-sm text-sm font-medium tracking-[-0.14px] text-text-inverse transition hover:bg-white/[0.04]"
               >
-                <ArrowsDownUp size={14} />
+                <FunnelSimple size={20} />
                 {SORT_LABEL[sort]}
+              </button>
+              <button
+                type="button"
+                onClick={onStartNewPitch}
+                className="inline-flex h-10 min-w-[120px] items-center justify-center gap-2 rounded-rounded bg-white px-4 text-sm font-medium tracking-[-0.14px] text-text-default transition hover:bg-white/90"
+              >
+                <Plus size={20} weight="bold" />
+                New Pitch
               </button>
             </div>
           </div>
 
           {visible.length === 0 ? (
-            <div className="flex flex-col items-center gap-2 rounded-md border border-line bg-white/[0.02] py-16 text-center">
+            <div className="flex flex-col items-center gap-2 rounded-md bg-white/5 py-16 text-center">
               <MagnifyingGlass size={24} className="text-text-inverse-subtlest" />
               <p className="text-sm font-medium text-text-inverse">
                 No pitches found
@@ -211,7 +170,7 @@ export function PitchListPage({
               </p>
             </div>
           ) : (
-            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
               {visible.map((pitch) => (
                 <PitchCard
                   key={pitch.id}
@@ -232,62 +191,51 @@ export function PitchListPage({
   );
 }
 
-function StatCard({
-  icon,
-  label,
-  value,
-  hint,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-  hint?: string;
-}) {
+function MetricCard({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-md border border-line bg-white/[0.02] px-4 py-3">
-      <div className="flex items-center gap-2">
-        {icon}
-        <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-text-inverse-subtlest">
-          {label}
-        </p>
-      </div>
-      <p className="mt-2 text-xl font-semibold text-text-inverse">
+    <div className="flex flex-col gap-2 rounded-md bg-white/5 p-4">
+      <p className="text-sm tracking-[-0.14px] text-text-inverse-subtlest">
+        {label}
+      </p>
+      <p className="text-2xl font-medium leading-[1.2] tracking-[-0.36px] text-text-inverse">
         {value}
-        {hint && (
-          <span className="ml-2 text-xs font-normal text-text-inverse-subtle">
-            {hint}
-          </span>
-        )}
       </p>
     </div>
   );
 }
 
 function StatusBadge({ pitch }: { pitch: PitchListItem }) {
-  if (pitch.status === "ongoing" && pitch.daysLeft <= 5) {
-    return (
-      <span className="rounded-full bg-red-500/20 px-2 py-0.5 text-[10px] font-medium text-red-300">
-        Urgent
-      </span>
-    );
-  }
-  if (pitch.status === "ongoing") {
-    return (
-      <span className="rounded-full bg-sky-500/20 px-2 py-0.5 text-[10px] font-medium text-sky-300">
-        Ongoing
-      </span>
-    );
-  }
   if (pitch.status === "finished") {
     return (
-      <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-[10px] font-medium text-emerald-300">
-        Finished
+      <span className="inline-flex h-5 shrink-0 items-center rounded-xs bg-positive-950 px-1.5 text-xs font-medium text-positive-500">
+        Done
+      </span>
+    );
+  }
+  if (pitch.status === "draft") {
+    return (
+      <span className="inline-flex h-5 shrink-0 items-center rounded-xs bg-white/10 px-1.5 text-xs font-medium text-text-inverse-subtle">
+        Draft
+      </span>
+    );
+  }
+  if (pitch.daysLeft <= 5) {
+    return (
+      <span className="inline-flex h-5 shrink-0 items-center rounded-xs bg-negative-subtle px-1.5 text-xs font-medium text-red-50">
+        High Priority
+      </span>
+    );
+  }
+  if (pitch.daysLeft <= 10) {
+    return (
+      <span className="inline-flex h-5 shrink-0 items-center rounded-xs bg-negative-subtle px-1.5 text-xs font-medium text-red-50">
+        At Risk
       </span>
     );
   }
   return (
-    <span className="rounded-full bg-white/[0.06] px-2 py-0.5 text-[10px] font-medium text-text-inverse-subtle">
-      Draft
+    <span className="inline-flex h-5 shrink-0 items-center rounded-xs bg-positive-950 px-1.5 text-xs font-medium text-positive-500">
+      On Track
     </span>
   );
 }
@@ -308,83 +256,73 @@ function PitchCard({
   );
   const finished = pitch.status === "finished";
 
-  const phaseLabel = finished
-    ? "All stages complete"
-    : activeStep
-      ? `${activeStage?.label ?? ""} · ${activeStep.label}`
-      : "Not started";
-
-  const barColor = finished
-    ? "bg-emerald-400"
-    : pitch.status === "draft"
-      ? "bg-white/20"
-      : "bg-sky-400";
+  const phaseLabel = pitch.newlyCreated
+    ? "Brief Decoder: AI decoding brief…"
+    : finished
+      ? "All stages complete"
+      : activeStep
+        ? `${activeStage?.label ?? ""}: ${activeStep.label}`
+        : "Not started";
 
   return (
     <button
       type="button"
       onClick={onOpen}
-      className={`group flex flex-col gap-4 rounded-md border p-5 text-left transition ${
+      className={`group flex min-h-[205px] flex-col gap-4 rounded-md p-4 text-left transition ${
         pitch.newlyCreated
-          ? "border-sky-400/50 bg-sky-500/[0.06] shadow-[0_0_0_3px_rgba(56,189,248,0.12)]"
-          : "border-line bg-white/[0.02] hover:border-white/20 hover:bg-white/[0.04]"
-      } ${finished ? "opacity-70 hover:opacity-100" : ""}`}
+          ? "border border-sky-400/50 bg-sky-500/[0.06] shadow-[0_0_0_3px_rgba(56,189,248,0.12)]"
+          : "bg-white/5 hover:bg-white/[0.07]"
+      }`}
     >
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex min-w-0 items-center gap-3">
-          <span
-            className="flex size-10 shrink-0 items-center justify-center rounded-md text-xs font-semibold text-white"
-            style={{ backgroundColor: pitch.logoColor }}
-          >
-            {pitch.logoInitials}
-          </span>
-          <div className="min-w-0">
-            <h3 className="truncate text-sm font-medium text-text-inverse">
-              {pitch.brand}
-            </h3>
-            <p className="truncate text-xs text-text-inverse-subtle">
-              {pitch.project}
-            </p>
-          </div>
+      <div className="flex items-center gap-4">
+        <span
+          className="flex size-10 shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white"
+          style={{ backgroundColor: pitch.logoColor }}
+        >
+          {pitch.logoInitials}
+        </span>
+        <div className="min-w-0 flex-1">
+          <h3 className="truncate text-sm font-medium tracking-[-0.14px] text-text-inverse">
+            {pitch.brand}
+          </h3>
+          <p className="truncate text-xs text-text-inverse-subtle">
+            {pitch.project}
+          </p>
         </div>
         <StatusBadge pitch={pitch} />
       </div>
 
-      <div>
-        <div className="flex items-center justify-between text-[11px]">
-          <span className="text-text-inverse-subtle">
-            {progress.approved} of {progress.total} steps
-          </span>
-          <span className="font-mono text-text-inverse-subtlest">
-            {progress.percent}%
-          </span>
-        </div>
-        <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-white/[0.06]">
+      <div className="flex flex-col gap-3">
+        <p
+          className={`text-xs font-medium leading-[1.4] ${
+            pitch.newlyCreated ? "text-sky-300" : "text-text-inverse"
+          }`}
+        >
+          {phaseLabel}
+        </p>
+        <div className="h-1 overflow-hidden rounded-md bg-positive-950">
           <div
-            className={`h-full rounded-full ${barColor}`}
+            className="h-full rounded-md bg-positive-500"
             style={{ width: `${progress.percent}%` }}
           />
         </div>
-        {pitch.newlyCreated ? (
-          <div className="mt-2 flex items-center gap-1.5 text-[11px] font-medium text-sky-300">
-            <Cpu size={12} className="animate-pulse" />
-            Brief Decoder · AI decoding brief…
-          </div>
-        ) : (
-          <div className="mt-2 flex items-center gap-1.5 text-[11px] text-text-inverse-subtle">
-            <FileText size={12} />
-            {phaseLabel}
-          </div>
-        )}
+        <div className="flex items-baseline justify-between">
+          <span className="text-xs text-text-inverse-subtlest">
+            {progress.approved} of {progress.total} phases
+          </span>
+          <span className="rounded bg-white/15 px-1 text-xs font-medium text-text-inverse backdrop-blur-[8px]">
+            {progress.percent}%
+          </span>
+        </div>
       </div>
 
-      <div className="mt-auto flex items-center justify-between gap-3 pt-1">
-        <div className="flex items-center gap-1.5">
+      <div className="mt-auto flex items-center justify-between gap-3">
+        <div className="flex items-center">
           {pitch.sc || pitch.ce ? (
             <>
               {pitch.sc && (
                 <span
-                  className="flex size-6 items-center justify-center rounded-full text-[9px] font-semibold text-black"
+                  className="flex size-6 items-center justify-center rounded-full border-2 border-[#252525] text-[9px] font-semibold text-black"
                   style={{ backgroundColor: pitch.scColor ?? "#999" }}
                   title="Strategic Consultant"
                 >
@@ -393,7 +331,7 @@ function PitchCard({
               )}
               {pitch.ce && (
                 <span
-                  className="-ml-1 flex size-6 items-center justify-center rounded-full text-[9px] font-semibold text-black ring-2 ring-card-bg"
+                  className="-ml-1.5 flex size-6 items-center justify-center rounded-full border-2 border-[#252525] text-[9px] font-semibold text-black"
                   style={{ backgroundColor: pitch.ceColor ?? "#999" }}
                   title="Creative Executor"
                 >
@@ -402,31 +340,22 @@ function PitchCard({
               )}
             </>
           ) : (
-            <span className="text-[11px] italic text-text-inverse-subtlest">
+            <span className="text-xs italic text-text-inverse-subtlest">
               Unassigned
             </span>
           )}
         </div>
         <div className="text-right">
-          <p
-            className={`text-[11px] font-medium ${
-              finished
-                ? "text-text-inverse-subtle"
-                : pitch.daysLeft <= 3
-                  ? "text-red-300"
-                  : pitch.daysLeft <= 10
-                    ? "text-amber-300"
-                    : "text-text-inverse-subtle"
-            }`}
-          >
-            {finished ? pitch.deadline : `${pitch.deadline} · ${pitch.daysLeft}d left`}
+          <p className="text-xs text-text-inverse">
+            {finished
+              ? pitch.deadline
+              : `${pitch.deadline} • ${pitch.daysLeft}d left`}
           </p>
-          <p className="text-[10px] text-text-inverse-subtlest">
-            Updated {pitch.lastUpdated}
+          <p className="text-xs text-text-inverse-subtle">
+            Modified {pitch.lastUpdated}
           </p>
         </div>
       </div>
     </button>
   );
 }
-

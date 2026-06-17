@@ -3,12 +3,22 @@
 import type { BrandModuleId } from "./navV3Static";
 import { DOCK_BRANDS } from "./homeStatic";
 
+export type ChatProposal = {
+  id: string;
+  fieldKey: string;
+  label: string;
+  currentValue: string;
+  proposedValue: string;
+  sectionRef: string;
+};
+
 export type ChatMessage = {
   id: string;
   role: "user" | "agent";
   text: string;
   agentName?: string;
   agentColor?: string;
+  proposals?: ChatProposal[];
 };
 
 export type ChatScope = "general" | "brand";

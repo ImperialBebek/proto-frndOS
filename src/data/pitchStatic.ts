@@ -35,7 +35,7 @@ export const PITCH_STAGES: PitchStageDef[] = [
   {
     id: "business",
     label: "Business",
-    description: "Decode the client brief into a structured business brief and pitch plan.",
+    description: "Decode the client brief into a structured Business Briefcase and pitch plan.",
   },
   {
     id: "foundational",
@@ -66,11 +66,27 @@ export type PitchStepKind =
 
 export type PitchTrackType = "brand" | "campaign" | "content";
 
+/** How directly the brief supports an AI-detected track */
+export type EvidenceStrength = "high" | "medium" | "low";
+
 export const PITCH_TRACK_TYPE_LABEL: Record<PitchTrackType, string> = {
   brand: "Brand Platform",
   campaign: "Campaign",
   content: "Content Strategy",
 };
+
+/** Type-descriptive label for a track at the plan/setup stage — deliberately
+    generic so users read it as "AI detected a track of this type", not as the
+    AI having already invented the creative concept. */
+export function describeTrackType(
+  type: PitchTrackType,
+  indexWithinType: number,
+  totalOfType: number
+): string {
+  const base = PITCH_TRACK_TYPE_LABEL[type];
+  if (type === "brand") return `${base} Track`;
+  return totalOfType > 1 ? `${base} Track ${indexWithinType}` : `${base} Track`;
+}
 
 export type PitchStepDef = {
   id: string;
@@ -82,6 +98,14 @@ export type PitchStepDef = {
   timeEstimate?: string;
   trackType?: PitchTrackType;
   summary: string;
+  /** Track-only: type-descriptive label for plan/setup surfaces */
+  planLabel?: string;
+  /** Track-only: AI reasoning + brief citation for the reasoning drawer */
+  reasoning?: string;
+  sourceExcerpt?: string;
+  sourcePage?: string;
+  evidenceStrength?: EvidenceStrength;
+  evidenceSignals?: string[];
 };
 
 export const PITCH_STEPS: PitchStepDef[] = [
@@ -93,7 +117,7 @@ export const PITCH_STEPS: PitchStepDef[] = [
     role: "sc",
     dependsOn: [],
     summary:
-      "AI reads the raw client brief and decodes it into a structured Business Brief (sections A–E).",
+      "AI reads the raw client brief and decodes it into a structured Business Briefcase (sections A–E).",
   },
   {
     id: "pitch-plan",
@@ -254,9 +278,22 @@ export const CANNED_TRACK_BY_TYPE: Record<PitchTrackType, string> = {
 /* ------------------------------------------------------------------ */
 
 export type NewPitchTrackInput = {
+  /** Creative/working concept name — becomes the Work-stage step label */
   title: string;
   type: PitchTrackType;
   summary?: string;
+  /** Type-descriptive label shown at the plan/setup stage */
+  planLabel?: string;
+  /** Why the AI detected this track (shown in the reasoning drawer) */
+  reasoning?: string;
+  /** Verbatim brief excerpt the track was derived from */
+  sourceExcerpt?: string;
+  /** Page / section reference for the excerpt */
+  sourcePage?: string;
+  /** How directly the brief supports this track */
+  evidenceStrength?: EvidenceStrength;
+  /** Short checklist of why the AI is confident */
+  evidenceSignals?: string[];
 };
 
 function slugify(value: string): string {
@@ -288,6 +325,12 @@ export function buildPitchSteps(
     summary:
       track.summary ??
       `${PITCH_TRACK_TYPE_LABEL[track.type]} deliverable detected from the brief.`,
+    planLabel: track.planLabel,
+    reasoning: track.reasoning,
+    sourceExcerpt: track.sourceExcerpt,
+    sourcePage: track.sourcePage,
+    evidenceStrength: track.evidenceStrength,
+    evidenceSignals: track.evidenceSignals,
   }));
 
   const deckTemplate = PITCH_STEPS.find((step) => step.kind === "decking")!;
@@ -411,6 +454,8 @@ export type PitchListItem = {
   logoInitials: string;
   pitchType?: string;
   newlyCreated?: boolean;
+  /** Which decoded study case backs this pitch */
+  caseId?: string;
 };
 
 export const PITCHES: PitchListItem[] = [
@@ -428,6 +473,39 @@ export const PITCHES: PitchListItem[] = [
     ceColor: "#34D399",
     logoColor: "#0058A3",
     logoInitials: "IK",
+    caseId: "ikea",
+  },
+  {
+    id: "sunsilk-steel",
+    brand: "Sunsilk",
+    project: "Steel Launch — Thick & Bouncy Hair",
+    status: "ongoing",
+    lastUpdated: "4 hours ago",
+    deadline: "May 26, 2026",
+    daysLeft: 11,
+    sc: "EG",
+    scColor: "#60A5FA",
+    ce: "AH",
+    ceColor: "#F472B6",
+    logoColor: "#E4007C",
+    logoInitials: "SS",
+    caseId: "sunsilk",
+  },
+  {
+    id: "goodrich-onroad",
+    brand: "BFGoodrich",
+    project: "Awareness Project — On Road Video",
+    status: "ongoing",
+    lastUpdated: "Yesterday",
+    deadline: "Jul 22, 2026",
+    daysLeft: 37,
+    sc: "JP",
+    scColor: "#F59E0B",
+    ce: null,
+    ceColor: null,
+    logoColor: "#C8102E",
+    logoInitials: "BF",
+    caseId: "goodrich",
   },
   {
     id: "bca-digital",
@@ -539,6 +617,8 @@ export const PITCHES: PitchListItem[] = [
 /** Seed approval state per pitch (drives stage progress on cards + canvas) */
 export const SEED_APPROVED_STEPS: Record<string, readonly string[]> = {
   "ikea-fy27": ["brief-decoder", "pitch-plan", "research-4c"],
+  "sunsilk-steel": ["brief-decoder", "pitch-plan"],
+  "goodrich-onroad": ["brief-decoder"],
   "bca-digital": ["brief-decoder", "pitch-plan"],
   "telkomsel-q3": ["brief-decoder"],
   "grab-superapp": ALL_PITCH_STEP_IDS,
@@ -565,12 +645,88 @@ export type BriefSection = {
   fields: BriefField[];
 };
 
+/** Risk lens id for multi-option brief decoding */
+export type BriefOptionId = "safe" | "balanced" | "bold";
+
+/** A full alternative Business Briefcase interpretation (A–E + DM + Strategy) */
+export type PitchBriefOption = {
+  id: BriefOptionId;
+  lens: string;
+  descriptor: string;
+  fitScore: number;
+  briefEssence: string;
+  projectType: string;
+  businessBrief: BriefSection[];
+  stakeholders: BriefStakeholder[];
+  winningAngles: WinningAngle[];
+};
+
+/** Internal decision-maker (template section E) rendered as a rich card */
+export type BriefStakeholder = {
+  id: string;
+  name: string;
+  role: string;
+  /** What drives their decision */
+  motivation: string;
+  influence: "high" | "medium" | "low";
+  /** The angle that wins them over */
+  winningHook: string;
+};
+
+/** A single "Our Strategy to Win the Pitch" angle (template Pitching Strategy) */
+export type WinningAngle = {
+  id: string;
+  angle: string;
+  /** Optional decision-maker this angle is aimed at */
+  linkedStakeholderId?: string;
+  rationale: string;
+};
+
 export type PitchDeliverable = {
   stepId: string;
   type: PitchTrackType;
+  /** Creative/working concept name (used once the user works the track) */
   title: string;
+  /** Type-descriptive label shown on the Pitch Plan / Review Setup */
+  planLabel: string;
   summary: string;
   source: string;
+  /** Why the AI suggested this track */
+  reasoning: string;
+  /** Verbatim brief excerpt it was derived from */
+  sourceExcerpt: string;
+  /** Page / section reference for the excerpt */
+  sourcePage: string;
+  evidenceStrength?: EvidenceStrength;
+  evidenceSignals?: string[];
+};
+
+/** A pre-authored plan scope option offered at Review Setup */
+export type PitchScopeOption = {
+  id: "lean" | "balanced" | "ambitious";
+  label: string;
+  description: string;
+  tracks: NewPitchTrackInput[];
+};
+
+/** Shape of a decoded brief — produced by mock static data or the real AI */
+export type DecodedBrief = {
+  briefEssence: string;
+  projectType: string;
+  businessBrief: BriefSection[];
+  stakeholders: BriefStakeholder[];
+  winningAngles: WinningAngle[];
+  deliverables: Array<{
+    type: PitchTrackType;
+    planLabel: string;
+    title: string;
+    summary: string;
+    reasoning: string;
+    sourceExcerpt: string;
+    sourcePage: string;
+    evidenceStrength?: EvidenceStrength;
+    evidenceSignals?: string[];
+  }>;
 };
 
 export type ResearchCard = {
@@ -598,7 +754,27 @@ export type BigIdea = {
   selected?: boolean;
 };
 
-export const IKEA_DECODE = {
+/** A complete decoded brief case — one study case in the prototype */
+export type PitchCaseDecode = {
+  briefFileName: string;
+  briefEssence: string;
+  projectType: string;
+  businessBrief: BriefSection[];
+  stakeholders: BriefStakeholder[];
+  winningAngles: WinningAngle[];
+  pitchPlan: {
+    headline: string;
+    note: string;
+    deliverables: PitchDeliverable[];
+  };
+  research4C: ResearchCard[];
+  commStrategy: GwtbStrategy;
+  bigIdeas: BigIdea[];
+  /** Extra tracks the AI would add in the most ambitious scope option */
+  ambitiousExtraTracks?: NewPitchTrackInput[];
+};
+
+export const IKEA_DECODE: PitchCaseDecode = {
   briefFileName: "IKEA_Creative_Brief_FY27_Updated.pdf",
   briefEssence: "Sediakan Ruang Untuk Bertumbuh",
   projectType: "Full Brand Platform + L1 Campaign",
@@ -715,11 +891,6 @@ export const IKEA_DECODE = {
           value: "Informa, Vivere, Fabelio, Dekoruma, ACE Hardware (share of wallet).",
         },
         {
-          label: "Decision Makers",
-          value:
-            "Andika Pratama (Brand Lead) — favors platform thinking. Rina Sari (Marketing Director) — ROI-driven, wants retail proof.",
-        },
-        {
           label: "Competing Agencies",
           value: "Not disclosed in brief or MoM.",
           needsInfo: true,
@@ -733,57 +904,140 @@ export const IKEA_DECODE = {
     },
   ] satisfies BriefSection[],
 
+  stakeholders: [
+    {
+      id: "andika",
+      name: "Andika Pratama",
+      role: "Brand Lead",
+      motivation:
+        "Wants a platform idea with multi-year legs — something he can defend to regional as 'IKEA Indonesia's own thinking', not a one-off campaign.",
+      influence: "high",
+      winningHook:
+        "Lead with the platform's 3-year roadmap and how every deliverable compounds it — make him the owner of a lasting idea.",
+    },
+    {
+      id: "rina",
+      name: "Rina Sari",
+      role: "Marketing Director",
+      motivation:
+        "ROI-driven and skeptical of 'pretty' work. Needs retail proof — store visits and basket — to sign budget.",
+      influence: "high",
+      winningHook:
+        "Open the campaign sections with the store-visit and transaction targets, and show the retail-activation track converting awareness to footfall.",
+    },
+  ] satisfies BriefStakeholder[],
+
+  winningAngles: [
+    {
+      id: "growth-ruler",
+      angle:
+        "Bring the 'growth ruler' device into the room as a physical artefact at the pitch — let Andika and Rina mark their own kids' height on it. Not in the brief, but it makes the platform tangible in 10 seconds.",
+      linkedStakeholderId: "andika",
+      rationale:
+        "Andika wants an ownable, lasting idea; a physical device he can point to makes the platform feel real and defensible internally.",
+    },
+    {
+      id: "retail-proof-first",
+      angle:
+        "Open with a live retail-footfall model (not asked for) before any creative — show the math from awareness to store visit to basket.",
+      linkedStakeholderId: "rina",
+      rationale:
+        "Rina signs the budget on ROI; leading with proof disarms the 'too pretty' objection before the creative even lands.",
+    },
+    {
+      id: "inhouse-engine",
+      angle:
+        "Hand over a ready-to-run content engine playbook the in-house team can operate without us — generosity that signals partnership over dependency.",
+      rationale:
+        "The brief asks for a content engine; giving away the operating system (not just assets) differentiates us from agencies selling retainers.",
+    },
+  ] satisfies WinningAngle[],
+
   pitchPlan: {
     headline: "6 deliverable tracks detected from this brief",
-    note: "Based on the deliverables list, budget shape and the client's platform ambition, frndOS suggests splitting the work into 1 brand platform, 3 campaigns and 2 content strategies. All tracks share one foundation: Research 4C → Comm Strategy → Big Ideas.",
+    note: "Based on the deliverables list, budget shape and the client's platform ambition, frndOS detected 1 brand platform, 3 campaigns and 2 content strategies. The AI only detects how many tracks and what type — the creative concepts are yours to build. All tracks share one foundation: Research 4C → Comm Strategy → Big Ideas.",
     deliverables: [
       {
         stepId: "track-brand-platform",
         type: "brand",
+        planLabel: "Brand Platform Track",
         title: "FY27 Brand Platform",
         summary:
           "The multi-year platform idea — positioning territory, visual system and brand voice that everything else plugs into.",
         source: "Brief §Objective — 'platform idea that compounds across the year'",
+        reasoning:
+          "The brief explicitly asks to reposition IKEA and wants 'a platform idea that compounds across the year' with '3+ year longevity'. That signals a foundational brand-platform deliverable, not a single campaign — so the AI detected exactly one brand track that the campaign and content tracks all inherit from.",
+        sourceExcerpt:
+          "\"Reposition IKEA … wants a platform idea that compounds across the year.\" / Success: \"Platform longevity (3+ years).\"",
+        sourcePage: "Brief §B Objective + §D Success Criteria",
       },
       {
         stepId: "track-campaign-launch",
         type: "campaign",
+        planLabel: "Campaign Track 1 — Launch Moment",
         title: "Hari Ruang Keluarga (Launch)",
         summary:
           "L1 launch campaign introducing the platform to Indonesian families with a national moment.",
         source: "Brief §Deliverables — 'launch campaign'",
+        reasoning:
+          "'Launch campaign' is named directly in the deliverables list, and the objective calls for lifting store visits — a high-impact L1 moment. The AI flagged this as a distinct campaign track because launch and seasonal work run on different calendars and budgets.",
+        sourceExcerpt:
+          "Deliverables: \"…launch campaign…\" · Success: \"campaign that lifts store visits.\"",
+        sourcePage: "Brief §A Deliverables",
       },
       {
         stepId: "track-campaign-ramadan",
         type: "campaign",
+        planLabel: "Campaign Track 2 — Seasonal Moment",
         title: "Ramadan di Rumah (Seasonal)",
         summary:
           "Seasonal Ramadan campaign on togetherness at home — IKEA's biggest retail window.",
         source: "Brief §Deliverables — 'Ramadan campaign'",
+        reasoning:
+          "The deliverables list a Ramadan campaign separately from the launch. Because it's calendar-locked to IKEA's biggest retail window, the AI kept it as its own campaign track rather than folding it into the launch.",
+        sourceExcerpt: "Deliverables: \"…Ramadan & always-on campaigns…\"",
+        sourcePage: "Brief §A Deliverables",
       },
       {
         stepId: "track-campaign-belajar",
         type: "campaign",
+        planLabel: "Campaign Track 3 — Always-On",
         title: "Sudut Belajar (Always-on)",
         summary:
           "Always-on campaign around study corners for growing kids, sustaining the platform between peaks.",
         source: "Brief §Deliverables — 'always-on campaign'",
+        reasoning:
+          "An 'always-on' campaign is listed alongside the seasonal one. Always-on work has a different cadence (continuous vs burst), so the AI detected a third campaign track to sustain the platform between peaks.",
+        sourceExcerpt: "Deliverables: \"…Ramadan & always-on campaigns…\"",
+        sourcePage: "Brief §A Deliverables",
       },
       {
         stepId: "track-content-social",
         type: "content",
+        planLabel: "Content Track 1 — Social Engine",
         title: "Social Content System",
         summary:
           "12-month social strategy: pillars, formats and cadence the in-house team can run.",
         source: "Brief §Success Criteria — 'content engine the in-house team can run'",
+        reasoning:
+          "Success criteria call for 'a content engine the in-house team can run'. That's a content-strategy deliverable (pillars/formats/cadence), distinct from campaigns — the AI detected a dedicated social content track.",
+        sourceExcerpt:
+          "Success: \"content engine the in-house team can run.\"",
+        sourcePage: "Brief §D Success Criteria",
       },
       {
         stepId: "track-content-retail",
         type: "content",
+        planLabel: "Content Track 2 — Retail Activation",
         title: "Retail Activation Content",
         summary:
           "In-store and activation content connecting the platform to store visits.",
         source: "Brief §Success Criteria — 'campaign that lifts store visits'",
+        reasoning:
+          "Retail proof is a recurring demand (Rina Sari, store-visit lift). In-store/activation content runs on a different surface than social, so the AI split it into a second content track focused on converting the platform into footfall.",
+        sourceExcerpt:
+          "Success: \"campaign that lifts store visits.\" · Decision maker: Rina Sari wants retail proof.",
+        sourcePage: "Brief §D + §E",
       },
     ] satisfies PitchDeliverable[],
   },
@@ -863,7 +1117,21 @@ export const IKEA_DECODE = {
       score: 3.8,
     },
   ] satisfies BigIdea[],
-} as const;
+
+  ambitiousExtraTracks: [
+    {
+      title: "Commerce Activation Track",
+      type: "content",
+      planLabel: "Content Track 3 — Commerce",
+      summary:
+        "Marketplace storefront + bundle strategy converting the platform directly to basket — beyond the brief, but it's where Rina Sari's ROI lives.",
+      reasoning:
+        "Not named in the brief, but the ROI/store-visit pressure points to a commerce surface. Added only in the Ambitious scope as an upsell track.",
+      sourceExcerpt: "Inferred from §E Decision Makers (Rina Sari — ROI-driven).",
+      sourcePage: "Beyond brief — Ambitious scope",
+    },
+  ],
+};
 
 /* ------------------------------------------------------------------ */
 /* Canned work-track outputs (per track × sub-step)                    */
@@ -1615,13 +1883,112 @@ export function getTrackSubStepOutput(
   return undefined;
 }
 
-/** AI suggestion prefill for the /pitch/new creation page */
-export const SUGGESTED_TRACKS: NewPitchTrackInput[] =
-  IKEA_DECODE.pitchPlan.deliverables.map((deliverable) => ({
+/** Convert a deliverable into the editable track-input shape */
+export function deliverableToTrackInput(
+  deliverable: PitchDeliverable
+): NewPitchTrackInput {
+  return {
     title: deliverable.title,
     type: deliverable.type,
     summary: deliverable.summary,
-  }));
+    planLabel: deliverable.planLabel,
+    reasoning: deliverable.reasoning,
+    sourceExcerpt: deliverable.sourceExcerpt,
+    sourcePage: deliverable.sourcePage,
+    evidenceStrength: deliverable.evidenceStrength,
+    evidenceSignals: deliverable.evidenceSignals,
+  };
+}
+
+/** Build up to 3 scope options (Lean / Balanced / Ambitious) from a track list. */
+export function buildScopeOptions(
+  all: NewPitchTrackInput[],
+  ambitiousExtraTracks?: NewPitchTrackInput[]
+): PitchScopeOption[] {
+  // Lean: one of each type, prioritising order of appearance, min 1.
+  const seenTypes = new Set<PitchTrackType>();
+  const lean: NewPitchTrackInput[] = [];
+  for (const track of all) {
+    if (!seenTypes.has(track.type)) {
+      seenTypes.add(track.type);
+      lean.push(track);
+    }
+  }
+  const leanTracks = lean.length > 0 ? lean : all.slice(0, 1);
+
+  const options: PitchScopeOption[] = [];
+  if (leanTracks.length < all.length) {
+    options.push({
+      id: "lean",
+      label: "Lean",
+      description: `Tightest scope — ${leanTracks.length} track${
+        leanTracks.length === 1 ? "" : "s"
+      }, one per deliverable type. Fastest to pitch.`,
+      tracks: leanTracks,
+    });
+  }
+  options.push({
+    id: "balanced",
+    label: "Balanced",
+    description: `Exactly what the AI detected in the brief — ${all.length} track${
+      all.length === 1 ? "" : "s"
+    }. Recommended.`,
+    tracks: all,
+  });
+  if (ambitiousExtraTracks && ambitiousExtraTracks.length > 0) {
+    options.push({
+      id: "ambitious",
+      label: "Ambitious",
+      description: `Everything in the brief plus ${ambitiousExtraTracks.length} proactive track${
+        ambitiousExtraTracks.length === 1 ? "" : "s"
+      } that go beyond it.`,
+      tracks: [...all, ...ambitiousExtraTracks],
+    });
+  }
+  return options;
+}
+
+/** Derive up to 3 scope options (Lean / Balanced / Ambitious) for a case. */
+export function getScopeOptions(decode: PitchCaseDecode): PitchScopeOption[] {
+  return buildScopeOptions(
+    decode.pitchPlan.deliverables.map(deliverableToTrackInput),
+    decode.ambitiousExtraTracks
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Multi-case registry — every study case the prototype can decode     */
+/* ------------------------------------------------------------------ */
+
+export type PitchCaseMeta = {
+  id: string;
+  decode: PitchCaseDecode;
+  /** Brief text transcript fed to the real-AI decode path */
+  transcript: string;
+  form: {
+    brand: string;
+    project: string;
+    deadline: string;
+    pitchType: string;
+  };
+};
+
+/** Filled in below once every decode + transcript is defined */
+export const PITCH_CASES: Record<string, PitchCaseMeta> = {} as Record<
+  string,
+  PitchCaseMeta
+>;
+
+export const DEFAULT_CASE_ID = "ikea";
+
+export function getCaseDecode(caseId: string | undefined): PitchCaseDecode {
+  return (PITCH_CASES[caseId ?? DEFAULT_CASE_ID] ?? PITCH_CASES[DEFAULT_CASE_ID])
+    .decode;
+}
+
+/** AI suggestion prefill for the /pitch/new creation page (IKEA default) */
+export const SUGGESTED_TRACKS: NewPitchTrackInput[] =
+  IKEA_DECODE.pitchPlan.deliverables.map(deliverableToTrackInput);
 
 export const SUGGESTED_PITCH_FORM = {
   brand: "IKEA",
@@ -1650,7 +2017,7 @@ export const PITCH_DECODE_SCRIPT: PitchChatScriptMessage[] = [
   },
   {
     id: "decode-2",
-    text: "Decoded. Business Brief sections A–E populated. 1 field tagged [NEEDS INFO]: competing agency list. Review each section and fill the gap before approving.",
+    text: "Decoded. Business Briefcase sections A–E populated. 1 field tagged [NEEDS INFO]: competing agency list. Review each section and fill the gap before approving.",
     delay: 2600,
   },
   {
@@ -1660,7 +2027,7 @@ export const PITCH_DECODE_SCRIPT: PitchChatScriptMessage[] = [
   },
   {
     id: "decode-4",
-    text: "I also drafted your Pitch Plan — I detected 6 deliverables in this brief: 1 Brand Platform, 3 Campaigns and 2 Content Strategies. Approve the Business Brief to review the plan.",
+    text: "I also drafted your Pitch Plan — I detected 6 deliverables in this brief: 1 Brand Platform, 3 Campaigns and 2 Content Strategies. Approve the Business Briefcase to review the plan.",
     delay: 1800,
   },
 ];
@@ -1677,7 +2044,7 @@ export const PITCH_STEP_SCRIPTS: Record<string, PitchChatScriptMessage[]> = {
   "brief-decoder": [
     {
       id: "bd-1",
-      text: "This is the decoded Business Brief from IKEA_Creative_Brief_FY27_Updated.pdf. One field still needs info: competing agencies. Everything else is ready for your review.",
+      text: "This is the decoded Business Briefcase from IKEA_Creative_Brief_FY27_Updated.pdf. One field still needs info: competing agencies. Everything else is ready for your review.",
       delay: 600,
     },
   ],
@@ -1935,4 +2302,685 @@ export function getPitchStepScript(
 /** Canned agent reply when the user sends a message inside a pitch session */
 export function getPitchChatReply(stepLabel: string): string {
   return `Got it — I'll fold that into ${stepLabel}. I've noted it against the canvas; once you approve this step I'll carry the note into every downstream track.`;
+}
+
+/* ================================================================== */
+/* Additional study cases — BFGoodrich (≈2 tracks) & Sunsilk (≈4)      */
+/* ================================================================== */
+
+export const GOODRICH_DECODE: PitchCaseDecode = {
+  briefFileName: "BFGoodrich_Awareness_Project_Brief.pdf",
+  briefEssence: "Bikin BFGoodrich On Road Viral di Indonesia",
+  projectType: "Awareness Video Production",
+  businessBrief: [
+    {
+      id: "logistics",
+      letter: "A",
+      title: "Logistics",
+      fields: [
+        {
+          label: "Deliverables",
+          value:
+            "1 video concept, 2 durations (1× 60s + 1× 30s), each in 2 sizes (9×16 & 16×9). Main placement: Instagram, YouTube, TikTok + an offline event.",
+        },
+        { label: "Budget", value: "Rp 500 juta" },
+        {
+          label: "Timeline & Milestones",
+          value:
+            "Kick-off to agency 10 Jun · Proposal 24 Jun · Approval 1 Jul · Production 8–12 Jul · Final delivery 15–22 Jul 2026.",
+        },
+        {
+          label: "Project Folder",
+          value: "Lark Drive › Pitches › BFGoodrich Awareness",
+        },
+      ],
+    },
+    {
+      id: "business",
+      letter: "B",
+      title: "Business",
+      fields: [
+        {
+          label: "Background",
+          value:
+            "BFGoodrich is a 150+ year American tire brand (acquired by Michelin in 1990), famous for OFFROAD tires. Awareness in Indonesia is very low, especially for its ONROAD range.",
+        },
+        {
+          label: "Objective",
+          value:
+            "Introduce BFGoodrich On Road to Indonesia and boost awareness through virality — get acknowledged by the mass.",
+        },
+        {
+          label: "Business Opportunity",
+          value:
+            "No tire brand owns the 'daily on-road tire that's awet (durable) AND ganteng (good-looking)' space. Viral content can leapfrog low awareness quickly.",
+        },
+        {
+          label: "Strategy",
+          value:
+            "Go viral on mass media — the agency proposes the kind of communication that can make BFGoodrich viral.",
+        },
+      ],
+    },
+    {
+      id: "product",
+      letter: "C",
+      title: "Product & Positioning",
+      fields: [
+        {
+          label: "Brand",
+          value: "BFGoodrich = Ban Mobil Harian yang Awet dan Ganteng.",
+        },
+        {
+          label: "Product",
+          value:
+            "Advantage Touring — sidewall kokoh, kekuatan & keawetan lebih lama. g-Force Phenom — looks ganteng & performa gacor. Plus 6-year warranty from purchase date.",
+        },
+        {
+          label: "Target Audience",
+          value:
+            "Indonesian car owners and enthusiasts; a younger mass audience reachable through social virality.",
+        },
+        {
+          label: "Key Message",
+          value:
+            "BFGoodrich is an on-road tire — durable and good-looking for everyday driving.",
+        },
+      ],
+    },
+    {
+      id: "pitch",
+      letter: "D",
+      title: "Pitch / Project",
+      fields: [
+        {
+          label: "Mandatories",
+          value:
+            "Proposed brand ambassador / main actor: Gofar Hilman (the agency may decide if he suits the storyline). The communication must be able to make BFGoodrich viral.",
+        },
+        {
+          label: "Success Criteria",
+          value:
+            "Virality and awareness — being acknowledged by the mass across IG, YouTube, TikTok and the offline event.",
+        },
+        {
+          label: "Creative Considerations",
+          value:
+            "Freedom for the agency to explore the storyline and whether Gofar Hilman fits as the lead. Don't limit creativity — come with the best, most efficient proposal.",
+        },
+      ],
+    },
+    {
+      id: "people",
+      letter: "E",
+      title: "People & Insights",
+      fields: [
+        {
+          label: "Insights",
+          value:
+            "BFGoodrich's offroad heritage overshadows its on-road range in Indonesia; most people don't know it makes daily tires at all.",
+        },
+        {
+          label: "Competitors",
+          value: "Other tire brands with stronger local awareness and dealer presence.",
+        },
+        {
+          label: "Competing Agencies",
+          value: "Not disclosed in the brief.",
+          needsInfo: true,
+        },
+        {
+          label: "Remarks",
+          value:
+            "Tight production window (kick-off 10 Jun → final delivery 15–22 Jul). Budget Rp 500 juta.",
+        },
+      ],
+    },
+  ],
+  stakeholders: [
+    {
+      id: "marketing-lead",
+      name: "BFGoodrich Marketing Lead",
+      role: "Brand Marketing (Indonesia)",
+      motivation:
+        "Wants undeniable virality — a piece of content the mass actually shares, proving on-road awareness can be built fast on a lean budget.",
+      influence: "high",
+      winningHook:
+        "Show a clear, repeatable viral mechanic (not just a nice film) and how it spreads across IG/TikTok/YouTube + the offline event.",
+    },
+    {
+      id: "michelin-brand",
+      name: "Regional Brand Custodian",
+      role: "Michelin group brand guardian",
+      motivation:
+        "Protects the BFGoodrich brand equity — the 'awet & ganteng' message and product truth must survive the meme.",
+      influence: "medium",
+      winningHook:
+        "Tie the viral idea straight to the product truth (sidewall, looks, 6-yr warranty) so virality also builds the right associations.",
+    },
+  ],
+  winningAngles: [
+    {
+      id: "gofar-community",
+      angle:
+        "Beyond just casting Gofar Hilman, plug into his automotive/community credibility — co-create with his audience so the launch lands inside a real car-culture conversation, not as an ad.",
+      linkedStakeholderId: "marketing-lead",
+      rationale:
+        "The brief only proposes Gofar as an actor; using his community as a distribution engine is the un-briefed move that buys real virality on a Rp 500jt budget.",
+    },
+    {
+      id: "awet-ganteng-meme",
+      angle:
+        "Build the whole idea around an ownable, meme-able line — 'Awet dan Ganteng' — designed from day one to be remixed by users, not just broadcast.",
+      linkedStakeholderId: "michelin-brand",
+      rationale:
+        "A line that carries the product truth and is built for remix keeps brand equity intact while maximising shareability.",
+    },
+  ],
+  pitchPlan: {
+    headline: "2 deliverable tracks detected from this brief",
+    note: "This is a focused video-production brief — one creative idea expressed as a 60s hero and a 30s cutdown across 2 aspect ratios. The AI detected 2 content tracks, no brand or campaign-platform work. The AI only detects how many tracks and what type; the creative idea is yours.",
+    deliverables: [
+      {
+        stepId: "track-content-hero",
+        type: "content",
+        planLabel: "Content Track 1 — Hero Film",
+        title: "Hero Film (60s)",
+        summary:
+          "The 60-second hero film carrying the viral idea, mastered in 9×16 and 16×9 for YouTube and social.",
+        source: "Brief §Deliverable — '1× 60 second, in 9×16 & 16×9'",
+        reasoning:
+          "The deliverables table specifies a single video concept with a 60-second cut in two sizes. The AI treats the hero film as one content track because it's the master asset everything else is derived from.",
+        sourceExcerpt: "Deliverable: \"1 VIDEO, 2 DURATION, 2 SIZES — Video 1: 1× 60 second, in 9×16 & 16×9.\"",
+        sourcePage: "Brief p.4 — Objective & Deliverable",
+      },
+      {
+        stepId: "track-content-cutdown",
+        type: "content",
+        planLabel: "Content Track 2 — Social Cutdown",
+        title: "Social Cutdown (30s)",
+        summary:
+          "The 30-second cutdown optimised for TikTok/Reels feeds, in 9×16 and 16×9.",
+        source: "Brief §Deliverable — '1× 30 second, in 9×16 & 16×9'",
+        reasoning:
+          "A separate 30s duration is required across the same two sizes. Because short-form cutdowns are edited and distributed differently from the hero, the AI flagged them as their own content track.",
+        sourceExcerpt: "Deliverable: \"Video 2: 1× 30 second, in 9×16 & 16×9.\"",
+        sourcePage: "Brief p.4 — Objective & Deliverable",
+      },
+    ],
+  },
+  research4C: [
+    {
+      id: "company",
+      title: "Company",
+      subtitle: "BFGoodrich Indonesia",
+      insight:
+        "150+ years of heritage and Michelin backing, but in Indonesia the brand reads as 'offroad only' — on-road awareness is near zero.",
+      takeaway: "Reintroduce BFGoodrich as a daily on-road tire, loudly.",
+      source: "Brief background + category awareness scan",
+    },
+    {
+      id: "category",
+      title: "Category",
+      subtitle: "Tires in Indonesia",
+      insight:
+        "Tire comms are function-first (grip, durability). Nobody plays in 'good-looking + durable daily tire' with personality.",
+      takeaway: "Personality + virality is the white space.",
+      source: "Category comms audit",
+    },
+    {
+      id: "consumer",
+      title: "Consumer",
+      subtitle: "Car owners & enthusiasts",
+      insight:
+        "Younger drivers treat their car as self-expression; tires are an afterthought until something looks or feels off.",
+      takeaway: "Make the tire part of the car's 'ganteng' story.",
+      source: "Social listening on auto communities",
+    },
+    {
+      id: "culture",
+      title: "Culture",
+      subtitle: "Indonesian car culture",
+      insight:
+        "Auto-creator content and 'review jujur' formats drive huge engagement; humour spreads fastest.",
+      takeaway: "Ride creator-led, humorous formats for reach.",
+      source: "TikTok/IG auto-content trend scan",
+    },
+  ],
+  commStrategy: {
+    get: "Indonesian car owners who care how their car looks and lasts",
+    who: "have never thought of BFGoodrich as a daily on-road tire",
+    to: "see BFGoodrich as the on-road tire that's awet dan ganteng",
+    by: "making a genuinely shareable piece of content that puts the on-road range into car culture",
+    proposition: "Awet dan Ganteng — ban harian yang bikin penasaran.",
+  },
+  bigIdeas: [
+    {
+      id: "awet-ganteng",
+      title: "Awet dan Ganteng",
+      premise:
+        "A viral idea built on the tension between durability and good looks — the tire that survives Indonesian roads and still turns heads.",
+      score: 4.3,
+      selected: true,
+    },
+    {
+      id: "on-road-debut",
+      title: "BFGoodrich Turun ke Jalan",
+      premise:
+        "The offroad legend makes its on-road debut — a playful 'coming to the city' story starring a familiar face.",
+      score: 3.9,
+    },
+  ],
+  ambitiousExtraTracks: [
+    {
+      title: "Viral Amplification & Offline Event",
+      type: "campaign",
+      planLabel: "Campaign Track — Amplification",
+      summary:
+        "A lightweight amplification campaign + the offline event activation to push the film's reach beyond organic — beyond the core video deliverable.",
+      reasoning:
+        "The brief mentions an offline event placement but doesn't ask for a campaign. In the Ambitious scope the AI adds an amplification track to convert the film into a movement.",
+      sourceExcerpt: "Main placement includes \"OFFLINE EVENT — strengthen brand presence…\".",
+      sourcePage: "Brief p.6 — Main Placement (Ambitious scope)",
+    },
+  ],
+};
+
+export const SUNSILK_DECODE: PitchCaseDecode = {
+  briefFileName: "Sunsilk_Steel_Launch_Agency_Brief.pdf",
+  briefEssence: "Rambut Badai, Look-nya Mahal",
+  projectType: "Product Launch Campaign + Content",
+  businessBrief: [
+    {
+      id: "logistics",
+      letter: "A",
+      title: "Logistics",
+      fields: [
+        {
+          label: "Deliverables",
+          value:
+            "(1) Campaign idea & management; (2) Mahalini social-media content production; (3) Campaign orchestration — Other Say & Brand Say content pillars; (4) Other-say briefs for KOL, publishers, community and affiliates.",
+        },
+        {
+          label: "Budget",
+          value: "Open — 'we don't want to limit your creativity, come with your best and efficient proposal'.",
+        },
+        {
+          label: "Timeline & Milestones",
+          value:
+            "Briefing 8 May · Agency presentation 25–26 May · Announcement 27 May · Campaign period Jul–Dec 2026.",
+        },
+      ],
+    },
+    {
+      id: "business",
+      letter: "B",
+      title: "Business",
+      fields: [
+        {
+          label: "Background",
+          value:
+            "Sunsilk is launching 'Steel' — a Thick & Bouncy Hair range powered by Dynoxidil. The anti-hairfall category is stuck on functional problem-solution claims, while maximalist 'big hair' beauty is trending.",
+        },
+        {
+          label: "Objective",
+          value:
+            "Raise awareness of the new Sunsilk Thick & Bouncy range and move from 'hairfall prevention' to delivering aesthetic, fuller-looking hair.",
+        },
+        {
+          label: "Business Opportunity",
+          value:
+            "Own 'grow real big hair' beyond problem-solution — disrupt clinical sameness with Sunsilk's 'joyful science'.",
+        },
+        {
+          label: "Strategy",
+          value:
+            "Social-first idea with Mahalini's co-creation product as the core, building talkability and an edgy, sassy brand image.",
+        },
+      ],
+    },
+    {
+      id: "product",
+      letter: "C",
+      title: "Product & Positioning",
+      fields: [
+        {
+          label: "Brand",
+          value:
+            "Sunsilk: from a basic shampoo brand to a sassy, dynamic, treatment-led beauty brand.",
+        },
+        {
+          label: "Product",
+          value:
+            "Steel range — 4 steps (volumize, thicken, strengthen, grow) with Dynoxidil + folli peptides + zinc + ceramides. Claims: 2× faster growth, reduced hairfall, visibly denser hair.",
+        },
+        {
+          label: "Target Audience",
+          value:
+            "Young women ('joyriders') with early hairfall signs who want aesthetic fullness, not just longevity — adopting preventive care beyond shampoo.",
+        },
+        {
+          label: "Key Message",
+          value: "Ditch the hacks — grow bouncy big hair for real.",
+        },
+      ],
+    },
+    {
+      id: "pitch",
+      letter: "D",
+      title: "Pitch / Project",
+      fields: [
+        {
+          label: "Mandatories",
+          value:
+            "Mahalini co-creation product is the core idea. All efficacy claims validated with local CTI/R&D. Tone: sassy, edgy, youthful.",
+        },
+        {
+          label: "Success Criteria (KPIs)",
+          value:
+            "Sales uplift · buzz (brand mentions in Youscan) · brand power (drive 'edgy & cool brand') · awareness BLS uplift · high-engagement, organic talkability.",
+        },
+        {
+          label: "Creative Considerations",
+          value:
+            "Translate 'Rambut Badai, Look-nya Mahal' into a fresh, culturally relevant execution that elevates Sunsilk as edgy and youthful via joyful science.",
+        },
+      ],
+    },
+    {
+      id: "people",
+      letter: "E",
+      title: "People & Insights",
+      fields: [
+        {
+          label: "Insights",
+          value:
+            "'Rambut badai' mentions are up +105% MAT; Mahalini is the social definition of perfect big hair. Hair 'hacks' are stressful and don't last.",
+        },
+        {
+          label: "Competitors",
+          value:
+            "Anti-hairfall brands stuck on functional claims (reduce fall), none owning the aesthetic 'big hair' end-look.",
+        },
+        {
+          label: "Competing Agencies",
+          value: "Not disclosed in the brief.",
+          needsInfo: true,
+        },
+        {
+          label: "Remarks",
+          value:
+            "Mahalini SOWs still in discussion (exclusivity, co-creation claim rights, shoot outputs, boosting rights). BU-led local adaptation.",
+        },
+      ],
+    },
+  ],
+  stakeholders: [
+    {
+      id: "bu-marketing",
+      name: "Sunsilk BU Marketing Lead",
+      role: "Brand Unit Marketing",
+      motivation:
+        "Wants to make Sunsilk distinctive and desirable again — buzz and brand-power shifts toward 'edgy & cool' matter most.",
+      influence: "high",
+      winningHook:
+        "Lead with how the idea drives talkability and the 'edgy & cool' brand attribute, not just product claims.",
+    },
+    {
+      id: "brand-manager",
+      name: "Steel Brand Manager",
+      role: "Product / Launch owner",
+      motivation:
+        "Accountable for sales uplift and the launch KPIs — needs the Mahalini co-creation to convert buzz into trial.",
+      influence: "high",
+      winningHook:
+        "Show the path from Mahalini talkability to trial and sales, with the 'joyful science' proof making claims credible.",
+    },
+  ],
+  winningAngles: [
+    {
+      id: "teambadai-superfans",
+      angle:
+        "Activate Mahalini's superfans (#TeamBadai) as co-creators from comment section to real product proof — turn her fanbase into the launch's earned-media engine.",
+      linkedStakeholderId: "bu-marketing",
+      rationale:
+        "The brief centres Mahalini's content; mobilising her fandom as participants (not just audience) is the un-briefed move that manufactures organic buzz.",
+    },
+    {
+      id: "joyful-science-demo",
+      angle:
+        "Invent a signature 'joyful science' demo format that makes Dynoxidil's growth claim visual and shareable — disrupting the clinical sameness of the category.",
+      linkedStakeholderId: "brand-manager",
+      rationale:
+        "Makes the efficacy claims credible AND entertaining, bridging buzz to trial — exactly the brand-power + sales tension the BU is balancing.",
+    },
+  ],
+  pitchPlan: {
+    headline: "4 deliverable tracks detected from this brief",
+    note: "The brief lists four agency deliverables spanning one campaign idea and three content/orchestration streams. The AI detected 1 campaign and 3 content tracks, all built on the Mahalini co-creation core. The AI only detects track count and type; the creative idea is yours.",
+    deliverables: [
+      {
+        stepId: "track-campaign-idea",
+        type: "campaign",
+        planLabel: "Campaign Track 1 — Big Idea & Management",
+        title: "Campaign Idea & Management",
+        summary:
+          "The core social-first campaign idea built on Mahalini's co-creation, plus end-to-end campaign management.",
+        source: "Brief §Agency Deliverables — 'Campaign idea and management'",
+        reasoning:
+          "Deliverable #1 is explicitly the campaign idea and its management. That's the strategic campaign track every content stream hangs off, so the AI detected it as a single campaign track.",
+        sourceExcerpt: "Agency Deliverables: \"1. Campaign idea and management.\"",
+        sourcePage: "Brief p.38 — Agency Deliverables",
+      },
+      {
+        stepId: "track-content-mahalini",
+        type: "content",
+        planLabel: "Content Track 1 — Talent Content",
+        title: "Mahalini Social Content Production",
+        summary:
+          "Production of Mahalini's social-media content (Reels/TikTok) per the co-creation SOW.",
+        source: "Brief §Agency Deliverables — 'Mahalini social media contents production'",
+        reasoning:
+          "Deliverable #2 is talent content production — a distinct content stream with its own shoot/SOW. The AI separates it from orchestration because it's produced, not just planned.",
+        sourceExcerpt: "Agency Deliverables: \"2. Mahalini social media contents production.\"",
+        sourcePage: "Brief p.38 — Agency Deliverables",
+      },
+      {
+        stepId: "track-content-orchestration",
+        type: "content",
+        planLabel: "Content Track 2 — Content Pillars",
+        title: "Campaign Orchestration (Brand Say + Other Say)",
+        summary:
+          "The content-pillar system orchestrating Brand Say and Other Say across the campaign.",
+        source: "Brief §Agency Deliverables — 'content pillars of Other Say and Brand Say'",
+        reasoning:
+          "Deliverable #3 defines the content-pillar architecture. The AI flagged it as a content track because it governs how every piece is themed and sequenced.",
+        sourceExcerpt: "Agency Deliverables: \"3. Campaign orchestration: content pillars of Other Say and Brand Say.\"",
+        sourcePage: "Brief p.38 — Agency Deliverables",
+      },
+      {
+        stepId: "track-content-othersay",
+        type: "content",
+        planLabel: "Content Track 3 — Other-Say / Influencer",
+        title: "Other-Say Briefs (KOL, Publishers, Community, Affiliates)",
+        summary:
+          "Briefs and content guidance for KOLs, publishers, community and affiliates that make up the Other Say layer.",
+        source: "Brief §Agency Deliverables — 'Other say briefs: KOL, publishers, community, affiliates'",
+        reasoning:
+          "Deliverable #4 is the influencer/earned ecosystem. It has its own briefing and partner management, so the AI detected it as a separate content track.",
+        sourceExcerpt: "Agency Deliverables: \"4. Other say briefs: KOL, publishers, community, affiliates.\"",
+        sourcePage: "Brief p.38 — Agency Deliverables",
+      },
+    ],
+  },
+  research4C: [
+    {
+      id: "company",
+      title: "Company",
+      subtitle: "Sunsilk",
+      insight:
+        "Seen as a basic, grocery shampoo brand; needs to become distinctive and desirable again as treatment-led beauty.",
+      takeaway: "Reframe Sunsilk as edgy, treatment-led big-hair beauty.",
+      source: "Brand vision (brief 'from–to')",
+    },
+    {
+      id: "category",
+      title: "Category",
+      subtitle: "Anti-hairfall haircare",
+      insight:
+        "Category is stuck on functional problem-solution claims; 'growth' & 'density' innovation is rising (+26.9% treatments).",
+      takeaway: "Own the aesthetic 'big hair' end-look, not just prevention.",
+      source: "Category innovation data (brief)",
+    },
+    {
+      id: "consumer",
+      title: "Consumer",
+      subtitle: "Young women / joyriders",
+      insight:
+        "They want bold, expressive big hair and rely on stressful 'hacks' to fake fullness that thin hair can't pull off.",
+      takeaway: "Offer real big hair so they can ditch the hacks.",
+      source: "Social insight & human truth (brief)",
+    },
+    {
+      id: "culture",
+      title: "Culture",
+      subtitle: "Maximalist beauty",
+      insight:
+        "Maximalist 'big hair' is back as main-character energy; 'rambut badai' mentions +105%, Mahalini is the benchmark.",
+      takeaway: "Anchor in 'Rambut Badai' with Mahalini as proof.",
+      source: "Social signal (brief)",
+    },
+  ],
+  commStrategy: {
+    get: "young women whose looks are compromised by hairfall signs",
+    who: "see hair-fall products as purely functional and rely on stressful hacks for fullness",
+    to: "desire Sunsilk Thick & Bouncy as the way to grow real, fuller, bouncier hair",
+    by: "co-creating with Mahalini and disrupting clinical sameness with joyful science",
+    proposition: "Rambut Badai, Look-nya Mahal — grow real big hair.",
+  },
+  bigIdeas: [
+    {
+      id: "rambut-mahal-ini",
+      title: "Rambut Mahal(ini)!",
+      premise:
+        "Mahalini spills her thick-hair secret — co-creating with Sunsilk so everyone can get badai hair, turning her most-asked question into the campaign.",
+      score: 4.5,
+      selected: true,
+    },
+    {
+      id: "ditch-the-hacks",
+      title: "Ditch the Hacks",
+      premise:
+        "A playful takedown of stressful hair hacks vs. the real thing — joyful science that actually grows big hair.",
+      score: 4.0,
+    },
+  ],
+  ambitiousExtraTracks: [
+    {
+      title: "Sunsilk Brand Platform Refresh",
+      type: "brand",
+      planLabel: "Brand Platform Track",
+      summary:
+        "A longer-term brand-platform refresh repositioning Sunsilk as edgy/treatment-led beyond this single launch — beyond the brief's scope.",
+      reasoning:
+        "The brief is launch-scoped, but the 'from basic shampoo to desirable beauty brand' ambition implies platform work. The AI offers it only in the Ambitious scope.",
+      sourceExcerpt: "Brandverse: \"make Sunsilk distinctive and desirable again.\"",
+      sourcePage: "Brief p.49 — Brandverse (Ambitious scope)",
+    },
+  ],
+};
+
+/* ------------------------------------------------------------------ */
+/* Bundled brief transcripts (fed to the real-AI decode path)         */
+/* ------------------------------------------------------------------ */
+
+export const IKEA_TRANSCRIPT = `IKEA Creative Brief FY27 (Brand Agency Collaboration)
+Brief essence: "Sediakan Ruang Untuk Bertumbuh".
+Background: IKEA Indonesia enters FY27 with flat store traffic and rising competition from local modern furniture players (Informa, Vivere, Fabelio, Dekoruma, ACE Hardware).
+Objective: reposition IKEA from "aspirational Scandinavian showroom" to "everyday partner for growing Indonesian families". Platform idea that compounds across the year, 3+ year longevity.
+Opportunity: 73% of urban families live in homes under 90m²; nobody owns the "small space, growing family" territory.
+Deliverables: brand platform, launch campaign, Ramadan & always-on campaigns, social + retail content strategy, final pitch deck.
+Budget: IDR 3-5B. Timeline: briefing Apr 10, internal review May 2, submission May 5, presentation May 11 2026.
+Target: urban parents 28-40, income IDR 8-25M/mo; secondary newlyweds.
+Key message: whatever the size of your home, there is room for your family to grow.
+Mandatories: IKEA logo rules, real product SKUs, price callouts, Bahasa Indonesia first.
+Success: platform longevity (3+ years), campaign that lifts store visits, a content engine the in-house team can run.
+Decision makers: Andika Pratama (Brand Lead) favors platform thinking; Rina Sari (Marketing Director) is ROI-driven and wants retail proof.`;
+
+export const GOODRICH_TRANSCRIPT = `BFGoodrich Awareness Project — Video Production. Introducing BFGoodrich On Road to Indonesia.
+Background: BFGoodrich is a 150+ year American tire brand acquired by Michelin in 1990, famous for OFFROAD tires. Awareness in Indonesia is very low, especially for its ONROAD tires. Goal: increase awareness via viral content on mass media.
+Main communication: BFGoodrich = "Ban Mobil Harian yang Awet dan Ganteng". Advantage Touring = sidewall kokoh (kekuatan & keawetan lebih lama). g-Force Phenom = looks ganteng & performa gacor. 6-year warranty from purchase. From agency: propose communication that can make BFGoodrich viral.
+Objective: introduce BFGoodrich to the Indonesia market as an On Road Tire; boost awareness through virality; be acknowledged by the mass.
+Deliverable: 1 VIDEO, 2 DURATION, 2 SIZES. Video 1: 1x 60 second in 9x16 & 16x9. Video 2: 1x 30 second in 9x16 & 16x9.
+Actor: proposing Gofar Hilman as main brand ambassador / main actor; agency may decide whether he suits the storyline.
+Main placement: Instagram, YouTube, TikTok, Offline Event.
+Budget: Rp 500 juta. Timeline: 10 June kick-off to agency, 24 June proposal, 1 July approval, 8-12 July production, 15-22 July final delivery.`;
+
+export const SUNSILK_TRANSCRIPT = `Sunsilk Steel Launch — Agency Brief (April 2026).
+Social insight & human truth: young women ("joyriders") want bold, expressive big hair; maximalist beauty is back. They rely on stressful "hacks" to fake fullness. So we say: grow real big hair. Idea: ditch the hacks, grow bouncy big hair for real.
+Product truth: Sunsilk's joyful science. Steel range, 4 steps (volumize, thicken, strengthen, grow), powered by Dynoxidil + folli peptides + zinc salt + ceramides. Claims: 2x faster hair growth, reduces hairfall, visibly denser hair.
+Localized creative: tension thin hair (rambut tipis) vs thick fuller hair (rambut tebal / rambut badai); mentions +105%. Mahalini = definition of perfect big hair. Idea: "Rambut Badai, Look-nya Mahal" — Sunsilk co-creates with Mahalini.
+Communication objective: raise awareness of new Sunsilk Thick & Bouncy Hair; influence young women to use Sunsilk as hairfall prevention that also preserves aesthetic look.
+Agency Deliverables: 1. Campaign idea and management. 2. Mahalini social media contents production. 3. Campaign orchestration: content pillars of Other Say and Brand Say. 4. Other say briefs: KOL, publishers, community, affiliates.
+Timeline: briefing 8 May, agency presentation 25-26 May, announcement 27 May, campaign period July-December 2026. Budget: open ("don't limit your creativity").
+KPIs: sales uplift; buzz (brand mentions in Youscan); brand power (drive "edgy and cool brand"); awareness BLS uplift; high-engagement organic talkability.
+Mandatories: Mahalini co-creation core idea; validate claims with local CTI/R&D; sassy, edgy, youthful tone.`;
+
+/* Populate the case registry (decodes + transcripts defined above) */
+PITCH_CASES.ikea = {
+  id: "ikea",
+  decode: IKEA_DECODE,
+  transcript: IKEA_TRANSCRIPT,
+  form: {
+    brand: "IKEA",
+    project: "Brand Agency Collaboration FY27",
+    deadline: "May 11, 2026",
+    pitchType: "Competition Pitch",
+  },
+};
+PITCH_CASES.goodrich = {
+  id: "goodrich",
+  decode: GOODRICH_DECODE,
+  transcript: GOODRICH_TRANSCRIPT,
+  form: {
+    brand: "BFGoodrich",
+    project: "Awareness Project — On Road Video",
+    deadline: "Jul 22, 2026",
+    pitchType: "Client Pitch",
+  },
+};
+PITCH_CASES.sunsilk = {
+  id: "sunsilk",
+  decode: SUNSILK_DECODE,
+  transcript: SUNSILK_TRANSCRIPT,
+  form: {
+    brand: "Sunsilk",
+    project: "Steel Launch — Thick & Bouncy Hair",
+    deadline: "May 26, 2026",
+    pitchType: "Competition Pitch",
+  },
+};
+
+/** Map a brief file name to its case id (used by the sample-brief picker) */
+export function caseIdForFileName(fileName: string): string {
+  const found = Object.values(PITCH_CASES).find(
+    (entry) => entry.decode.briefFileName === fileName
+  );
+  return found?.id ?? DEFAULT_CASE_ID;
+}
+
+const CASE_STEPS_CACHE: Record<string, PitchStepDef[]> = {};
+
+/** Build the default pipeline for a non-IKEA case from its detected tracks.
+    IKEA keeps the hand-authored PITCH_STEPS (with deep TRACK_OUTPUTS), so this
+    is only used for the other study cases. */
+export function buildCaseSteps(caseId: string): PitchStepDef[] {
+  if (caseId === DEFAULT_CASE_ID) return PITCH_STEPS;
+  if (!CASE_STEPS_CACHE[caseId]) {
+    const decode = getCaseDecode(caseId);
+    CASE_STEPS_CACHE[caseId] = buildPitchSteps(
+      decode.pitchPlan.deliverables.map(deliverableToTrackInput)
+    );
+  }
+  return CASE_STEPS_CACHE[caseId];
 }

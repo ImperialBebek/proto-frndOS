@@ -8,9 +8,11 @@ import React, {
   useState,
 } from "react";
 import {
+  DEFAULT_CASE_ID,
   PITCH_STEPS,
   PITCHES,
   SEED_APPROVED_STEPS,
+  buildCaseSteps,
   buildPitchSteps,
   getTrackSubStepsForDef,
   type NewPitchTrackInput,
@@ -26,6 +28,8 @@ export type NewPitchInput = {
   project?: string;
   deadline?: string;
   pitchType?: string;
+  /** Which study case backs this pitch (drives the decoded dataset) */
+  caseId?: string;
   /** Edited AI-suggested deliverable tracks — builds a per-pitch pipeline */
   tracks?: NewPitchTrackInput[];
 };
@@ -35,6 +39,10 @@ interface PitchContextType {
   getPitch: (pitchId: string) => PitchListItem | undefined;
   createPitch: (input: NewPitchInput) => string;
   markDecoded: (pitchId: string) => void;
+  /** Which study case backs a pitch (drives the decoded dataset) */
+  getPitchCaseId: (pitchId: string) => string;
+  /** Rebuild a pitch's work-track pipeline (plan editing) */
+  updatePitchTracks: (pitchId: string, tracks: NewPitchTrackInput[]) => void;
   /** Per-pitch pipeline — custom steps for created pitches, default otherwise */
   getStepsForPitch: (pitchId: string) => PitchStepDef[];
   getStepDef: (pitchId: string, stepId: string) => PitchStepDef | undefined;
@@ -132,8 +140,15 @@ export function PitchProvider({ children }: { children: React.ReactNode }) {
   );
 
   const getStepsForPitch = useCallback(
-    (pitchId: string): PitchStepDef[] => customSteps[pitchId] ?? PITCH_STEPS,
-    [customSteps]
+    (pitchId: string): PitchStepDef[] => {
+      if (customSteps[pitchId]) return customSteps[pitchId];
+      const pitch = pitches.find((p) => p.id === pitchId);
+      if (pitch?.caseId && pitch.caseId !== DEFAULT_CASE_ID) {
+        return buildCaseSteps(pitch.caseId);
+      }
+      return PITCH_STEPS;
+    },
+    [customSteps, pitches]
   );
 
   const getStepDef = useCallback(
@@ -175,6 +190,7 @@ export function PitchProvider({ children }: { children: React.ReactNode }) {
       logoInitials: initials(brand) || "NP",
       pitchType: input.pitchType,
       newlyCreated: true,
+      caseId: input.caseId,
     };
 
     setPitches((prev) => [pitch, ...prev]);
@@ -193,6 +209,41 @@ export function PitchProvider({ children }: { children: React.ReactNode }) {
       )
     );
   }, []);
+
+  const getPitchCaseId = useCallback(
+    (pitchId: string) =>
+      pitches.find((p) => p.id === pitchId)?.caseId ?? DEFAULT_CASE_ID,
+    [pitches]
+  );
+
+  const updatePitchTracks = useCallback(
+    (pitchId: string, tracks: NewPitchTrackInput[]) => {
+      setCustomSteps((prev) => ({
+        ...prev,
+        [pitchId]: buildPitchSteps(tracks),
+      }));
+      // Track ids are regenerated — keep only shared (business/foundational)
+      // approvals; work + decking progress is reset.
+      setApprovedSteps((prev) => {
+        const current = prev[pitchId] ?? [];
+        const keep = current.filter((id) => {
+          const def = PITCH_STEPS.find((s) => s.id === id);
+          return (
+            def &&
+            (def.stageId === "business" || def.stageId === "foundational")
+          );
+        });
+        return { ...prev, [pitchId]: keep };
+      });
+      setApprovedSubSteps((prev) => {
+        if (!prev[pitchId]) return prev;
+        const next = { ...prev };
+        delete next[pitchId];
+        return next;
+      });
+    },
+    []
+  );
 
   const getApprovedSteps = useCallback(
     (pitchId: string) => approvedSteps[pitchId] ?? [],
@@ -377,6 +428,8 @@ export function PitchProvider({ children }: { children: React.ReactNode }) {
       getPitch,
       createPitch,
       markDecoded,
+      getPitchCaseId,
+      updatePitchTracks,
       getStepsForPitch,
       getStepDef,
       getSubSteps,
@@ -396,6 +449,8 @@ export function PitchProvider({ children }: { children: React.ReactNode }) {
       getPitch,
       createPitch,
       markDecoded,
+      getPitchCaseId,
+      updatePitchTracks,
       getStepsForPitch,
       getStepDef,
       getSubSteps,

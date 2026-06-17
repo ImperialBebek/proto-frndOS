@@ -50,7 +50,8 @@ type SidebarV3Props = {
   /** When set, the sidebar renders the pitch pipeline for this pitch session */
   activePitchId?: string | null;
   activePitchStepId?: string | null;
-  onPitchStepSelect?: (stepId: string) => void;
+  activePitchSubStepId?: string | null;
+  onPitchStepSelect?: (stepId: string, subStepId?: string) => void;
   onBackToPitchList?: () => void;
   /** When true, header shows only collapse icon (floating anchor mode) */
   floatingAnchor?: boolean;
@@ -90,6 +91,7 @@ export function SidebarV3({
   onFooterSelect,
   activePitchId = null,
   activePitchStepId = null,
+  activePitchSubStepId = null,
   onPitchStepSelect,
   onBackToPitchList,
   floatingAnchor = false,
@@ -137,7 +139,10 @@ export function SidebarV3({
         <PitchPipelineSidebarBody
           pitchId={activePitchId}
           activeStepId={activePitchStepId}
-          onStepSelect={(stepId) => onPitchStepSelect?.(stepId)}
+          activeSubStepId={activePitchSubStepId}
+          onStepSelect={(stepId, subStepId) =>
+            onPitchStepSelect?.(stepId, subStepId)
+          }
           onBackToPitchList={() => onBackToPitchList?.()}
         />
       ) : isBrand ? (

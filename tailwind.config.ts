@@ -39,11 +39,14 @@ const config: Config = {
         line: "var(--surface-line)",
         positive: {
           50: "var(--positive-50)",
+          500: "var(--positive-500)",
           600: "var(--positive-600)",
+          950: "var(--positive-950)",
         },
         negative: {
           50: "var(--negative-50)",
           500: "var(--negative-500)",
+          subtle: "var(--negative-subtle)",
         },
         warning: {
           50: "var(--warning-50)",
